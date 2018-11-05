@@ -1,0 +1,81 @@
+---
+boss__kubernetes__kubeadm__install_method: 'pkg'
+# Edition can be one of: 'ce' (Community Edition) or 'ee' (Enterprise Edition).
+boss__kubernetes__kubeadm__edition: 'ce'
+boss__kubernetes__kubeadm__package: "docker-{{ boss__kubernetes__kubeadm__edition }}"
+boss__kubernetes__kubeadm__package_state: present
+
+# Service options.
+boss__kubernetes__kubeadm__service_state: started
+boss__kubernetes__kubeadm__service_enabled: True
+boss__kubernetes__kubeadm__restart_handler_state: restarted
+
+# Docker Compose options.
+boss__kubernetes__kubeadm__install_compose: True
+boss__kubernetes__kubeadm__compose_version: "1.22.0"
+boss__kubernetes__kubeadm__compose_path: /usr/local/bin/docker-compose
+
+# FIXME: Remove this if this works
+# Some of the OS distributions are not detected by Ansible correctly. This
+# variable can be used to fix that issue across all roles that use it.
+boss__core__distribution: '{{ ansible_lsb.id
+                        if (ansible_lsb|d() and ansible_lsb.id|d())
+                        else ansible_distribution }}'
+
+# Some of the OS releases are not detected by Ansible correctly. This variable
+# can be used to fix that issue across all roles that use it.
+boss__core__distribution_release: '{{ ansible_lsb.codename
+                                if (ansible_lsb|d() and ansible_lsb.codename|d())
+                                else ansible_distribution_release }}'
+
+# Used only for Debian/Ubuntu. Switch 'stable' to 'edge' if needed.
+boss__kubernetes__kubeadm__apt_release_channel: stable
+# boss__kubernetes__kubeadm__apt_arch: amd64
+boss__kubernetes__kubeadm__apt_repository: "deb [arch={{ boss__kubernetes__kubeadm__apt_arch }}] https://download.docker.com/linux/{{ boss__core__distribution|lower }} {{ boss__core__distribution_release }} {{ boss__kubernetes__kubeadm__apt_release_channel }}"
+boss__kubernetes__kubeadm__apt_ignore_key_error: True
+
+# Used only for RedHat/CentOS/Fedora.
+boss__kubernetes__kubeadm__yum_repo_url: https://download.docker.com/linux/{{ (boss__core__distribution == "Fedora") | ternary("fedora","centos") }}/docker-{{ boss__kubernetes__kubeadm__edition }}.repo
+boss__kubernetes__kubeadm__yum_repo_enable_edge: 0
+boss__kubernetes__kubeadm__yum_repo_enable_test: 0
+
+# A list of users who will be added to the docker group.
+boss__kubernetes__kubeadm__default_users: ["{{ansible_user}}"]
+# A list of users who will be added to the docker group.
+boss__kubernetes__kubeadm__users: []
+
+
+
+# FIXME: Things prob won't work 100% till I include a subset of below
+# SOURCE: https://github.com/nickjj/ansible-docker/blob/master/defaults/main.yml
+
+# ---
+
+boss__kubernetes__kubeadm__remove_package: False
+
+boss__kubernetes__kubeadm__version: "latest"
+
+# boss__kubernetes__kubeadm__compose_version: "1.22.0"
+
+boss__kubernetes__kubeadm__registries: []
+
+boss__kubernetes__kubeadm__daemon_options: []
+boss__kubernetes__kubeadm__daemon_environment: []
+
+boss__kubernetes__kubeadm__cron_tasks:
+  - job: docker system prune -f &> /dev/null
+    name: "Docker clean up"
+    schedule: ["0", "0", "*", "*", "0"]
+
+boss__kubernetes__kubeadm__package_dependencies:
+  - "apt-transport-https"
+  - "ca-certificates"
+  - "software-properties-common"
+  - "gnupg2"
+  - "cron"
+  - "apt-utils"
+  - "mount"
+
+boss__kubernetes__kubeadm__apt_key_id: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+boss__kubernetes__kubeadm__apt_key_server: "https://download.docker.com/linux/{{ boss__core__distribution | lower }}/gpg"
+boss__kubernetes__kubeadm__apt_cache_time: 86400

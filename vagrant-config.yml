@@ -1,0 +1,50 @@
+# https://gist.github.com/gnarf/b103e77f37236ca72d8e
+:vms:
+  master:
+    :hostname: "master"
+    :ip: "10.0.0.10"
+    :ram: 1024
+    :cpu: 1
+    :box: "ubuntu/xenial64"
+    :id: 10
+
+  node1:
+    :hostname: "node1"
+    :ip: "10.0.0.11"
+    :ram: 1024
+    :cpu: 1
+    :box: "ubuntu/xenial64"
+    :id: 11
+
+  node2:
+    :hostname: "node2"
+    :ip: "10.0.0.12"
+    :ram: 1024
+    :cpu: 1
+    :box: "ubuntu/xenial64"
+    :id: 12
+
+  node3:
+    :hostname: "node3"
+    :ip: "10.0.0.13"
+    :ram: 1024
+    :cpu: 1
+    :box: "ubuntu/xenial64"
+    :id: 13
+
+:groups:
+  master:
+    - master
+  slaves:
+    - node1
+    - node2
+    - node3
+  agents:
+    - node1
+    - node2
+    - node3
+  servers:
+    - master
+    - node1
+    - node2
+    - node3

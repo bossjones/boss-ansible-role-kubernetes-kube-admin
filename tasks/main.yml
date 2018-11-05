@@ -1,0 +1,133 @@
+---
+- include_tasks: facts.yml
+
+- include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include_tasks: install-pkg.yml
+  when: boss__kubernetes__kubeadm__install_method == 'pkg'
+
+- include_tasks: install-shell.yml
+  when: boss__kubernetes__kubeadm__install_method == 'shell'
+
+#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+# SOURCE: https://github.com/nickjj/ansible-docker/blob/master/tasks/main.yml
+- name: Remove Upstart config file
+  file:
+    path: "/etc/default/docker"
+    state: "absent"
+
+- name: Ensure systemd directory exists
+  file:
+    path: "/etc/systemd/system"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Remove systemd unit file
+  file:
+    path: "/etc/systemd/system/docker.service"
+    state: "absent"
+  when: boss__kubernetes__kubeadm__remove_package
+
+- name: Generate systemd unit file
+  template:
+    src: "etc/systemd/system/docker.service.j2"
+    dest: "/etc/systemd/system/docker.service"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  register: boss__kubernetes__kubeadm__register_systemd_service
+  when: not boss__kubernetes__kubeadm__remove_package
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: True
+  notify: ["Restart Docker"]
+  when: not boss__kubernetes__kubeadm__remove_package or boss__kubernetes__kubeadm__register_systemd_service is changed
+
+
+- name: dump /etc/systemd/system/docker.service
+  command: 'cat /etc/systemd/system/docker.service'
+# - name: Add user(s) to "docker" group
+#   user:
+#     name: "{{ item }}"
+#     groups: "docker"
+#     append: True
+#   with_items: "{{ boss__kubernetes__kubeadm__default_users }}"
+#   when: not boss__kubernetes__kubeadm__remove_package and boss__kubernetes__kubeadm__default_users
+
+- name: Add user(s) to "docker" group
+  user:
+    name: "{{ item }}"
+    groups: "docker"
+    append: True
+  with_items: "{{ boss__kubernetes__kubeadm__users }}"
+  when: not boss__kubernetes__kubeadm__remove_package and boss__kubernetes__kubeadm__users
+
+- name: Install Python for managing Docker login credentials
+  apt:
+    name: "python"
+    update_cache: True
+    cache_valid_time: "{{ boss__kubernetes__kubeadm__apt_cache_time }}"
+  when: not boss__kubernetes__kubeadm__remove_package and boss__kubernetes__kubeadm__registries
+
+- name: Install docker-py for managing Docker login credentials
+  pip:
+    name: "docker-py"
+  when: not boss__kubernetes__kubeadm__remove_package and boss__kubernetes__kubeadm__registries
+
+# - name: Manage login credentials for 1 or more Docker registries
+#   docker_login:
+#     registry_url: "{{ item.registry_url | default(omit) }}"
+#     username: "{{ item.username }}"
+#     password: "{{ item.password }}"
+#     email: "{{ item.email | default(omit)}}"
+#     reauthorize: "{{ item.reauthorize | default(omit) }}"
+#     state: "{{ item.state | default(omit) }}"
+#   with_items: "{{ boss__docker_registries }}"
+#   when: not boss__docker_remove_package and boss__docker_registries
+#   become_user: "{{ item.system_user | default(omit) }}"
+
+- name: Remove cron tasks for Docker commands
+  cron:
+    name: "{{ item.name }}"
+    state: "absent"
+  with_items: "{{ boss__kubernetes__kubeadm__cron_tasks }}"
+  when: boss__kubernetes__kubeadm__remove_package and boss__kubernetes__kubeadm__cron_tasks
+
+- name: Create cron tasks for Docker commands
+  cron:
+    name: "{{ item.name }}"
+    job: "{{ item.job }}"
+    minute: "{{ item.schedule[0] }}"
+    hour: "{{ item.schedule[1] }}"
+    day: "{{ item.schedule[2] }}"
+    month: "{{ item.schedule[3] }}"
+    weekday: "{{ item.schedule[4] }}"
+  with_items: "{{ boss__kubernetes__kubeadm__cron_tasks }}"
+  when: not boss__kubernetes__kubeadm__remove_package and boss__kubernetes__kubeadm__cron_tasks
+
+# FIXME: This might be broken
+- name: Ensure Docker is started and enabled at boot.
+  service:
+    name: docker
+    state: "{{ boss__kubernetes__kubeadm__service_state }}"
+    enabled: "{{ boss__kubernetes__kubeadm__service_enabled }}"
+
+#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+
+- name: Ensure handlers are notified now to avoid firewall conflicts.
+  meta: flush_handlers
+
+- include_tasks: docker-compose.yml
+  when: boss__kubernetes__kubeadm__install_compose
+
+- include_tasks: docker-users.yml
+  when: boss__kubernetes__kubeadm__users
