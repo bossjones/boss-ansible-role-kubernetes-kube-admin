@@ -1,9 +1,8 @@
 ---
-- name: restart docker
-  service: "name=docker state={{ boss__kubernetes__kubeadm__restart_handler_state }}"
+- name: restart kubelet
+  service: "name=kubelet state={{ boss__kubernetes__kubeadm__restart_handler_state }}"
 
-# SOURCE: https://github.com/nickjj/ansible-docker/blob/master/handlers/main.yml
-- name: Restart Docker
+- name: Restart kubelet
   service:
-    name: "docker"
+    name: "kubelet"
     state: "restarted"

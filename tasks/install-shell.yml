@@ -1,6 +1,0 @@
----
-# Fetches the docker installation script
-# from `get.docker.com` and then pipes the
-# script to `sh` so that it gets executed.
-- name: 'install docker'
-  command: 'bash -c "curl -fsSL https://get.docker.com/ | sh"'

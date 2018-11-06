@@ -3,11 +3,11 @@ dependencies: []
 
 galaxy_info:
   author: bossjones
-  description: Docker for Linux.
+  description: Kubernetes cluster using kubeadm
   company: "Dark Industries"
   # FYI: This is for testing purposes only!!!!
   license: "Apache 2.0"
-  min_ansible_version: 2.4
+  min_ansible_version: 2.5
   platforms:
     - name: EL
       versions:
