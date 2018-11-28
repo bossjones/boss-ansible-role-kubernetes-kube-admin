@@ -27,10 +27,23 @@
   - ip_vs_sh
   - nf_conntrack_ipv4
 
-
 ####################################################
 # - include_tasks: install.yml
 ####################################################
+
+# SOURCE: https://github.com/containerd/cri/blob/master/contrib/ansible/tasks/bootstrap_ubuntu.yaml
+- name: "Install required packages on Ubuntu"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+      - unzip
+      - tar
+      - apt-transport-https
+      - btrfs-tools
+      - libseccomp2
+      - socat
+      - util-linux
 
 - name: add the kubernetes apt repo key
   apt_key:

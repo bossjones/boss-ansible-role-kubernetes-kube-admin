@@ -5,6 +5,9 @@
 # SOURCE: https://github.com/mckelvin/anyconnect-virtual-router/blob/master/Vagrantfile
 # SOURCE: https://github.com/jpetazzo/pipework#virtualbox
 # SOURCE: https://github.com/darkedges/vagrant-ansible-kubernetes/tree/master/ansible/roles/darkedges.nfs
+# SOURCE: https://github.com/kinvolk/kubernetes-the-hard-way-vagrant
+# SOURCE: https://github.com/kelseyhightower/kubernetes-the-hard-way
+# SOURCE: https://github.com/containerd/cri/blob/master/contrib/ansible/README.md
 
 # ansible_ssh_private_key_file: "{{ lookup('env', 'PWD') }}/.vagrant/machines/{{ inventory_hostname }}/virtualbox/private_key"
 # kubernetes_interface: "eth1"
