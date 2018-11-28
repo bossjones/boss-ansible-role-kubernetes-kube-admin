@@ -52,7 +52,10 @@ Vagrant.configure(2) do |config|
         # SOURCE: https://www.virtualbox.org/manual/ch09.html#changenat
         # NOTE:  # do not use 10.x network for NAT ?
         # This command would reserve the network addresses from 192.168.0.0 to 192.168.254.254 for the first NAT network instance of "VM name". The guest IP would be assigned to 192.168.0.15 and the default gateway could be found at 192.168.0.2.
-        v.customize ['modifyvm', :id, '--natnet1', "192.168/16"]
+        # NOTE: If, for any reason, the NAT network needs to be changed, this can be achieved with the following command: VBoxManage modifyvm "VM name" --natnet1 "192.168/16"
+        # SOURCE: https://github.com/hashicorp/vagrant/issues/2915#issuecomment-147026214
+        # ORIG # v.customize ['modifyvm', :id, '--natnet1', "192.168/16"]
+        v.customize ['modifyvm', :id, '--natnet1', "168.222.0/24"]
       end
 
       # If you want to create an array where each entry is a single word, you can use the %w{} syntax, which creates a word array:
