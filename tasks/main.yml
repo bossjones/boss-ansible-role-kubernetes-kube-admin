@@ -1,10 +1,10 @@
 ---
 - include_tasks: facts.yml
 
-# - include: "{{task}}.yml"
+- include: "{{task}}.yml"
 
-- include_tasks: prepare.yml
-  when: boss__kubernetes__kubeadm__run_prepare
+# - include_tasks: prepare.yml
+#   when: boss__kubernetes__kubeadm__run_prepare
 
 # FIXME: Enable this today 11/28/2018
 # - include_tasks: master.yml
