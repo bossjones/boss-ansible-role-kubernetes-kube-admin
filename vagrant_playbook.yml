@@ -33,6 +33,7 @@
   become_method: sudo
   tags:
     - bootstrap
+    - servers
   roles:
     - role: boss-ansible-role-bootstrap
     - role: boss-ansible-role-core
@@ -40,14 +41,29 @@
     - role: boss-ansible-role-environment
     - role: boss-ansible-role-etckeeper
 
+
+# # no_log: true
+- hosts: servers
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  tags:
+    - docker
+    - docker-provision
+  roles:
+    - role: geerlingguy.pip
+    - role: boss-ansible-role-docker
+      boss__kubernetes__kubeadm__install_method: "shell"
+
 # - hosts: servers
 #   gather_facts: True
 #   become: yes
 #   become_method: sudo
 #   tags:
 #     - docker
+#     - docker-provision
 #   roles:
-#     - role: geerlingguy.pip
+#     # - role: geerlingguy.pip
 #     - role: ../
 #       boss__kubernetes__kubeadm__install_method: "shell"
 

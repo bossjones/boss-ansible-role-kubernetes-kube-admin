@@ -44,17 +44,20 @@
       - libseccomp2
       - socat
       - util-linux
+  when: ansible_os_family == "Debian"
 
 - name: add the kubernetes apt repo key
   apt_key:
     url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
     state: present
+  when: ansible_os_family == "Debian"
 
 - name: add the kubernetes apt repo
   apt_repository:
     repo: "deb http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} main"
     update_cache: True
     state: present
+  when: ansible_os_family == "Debian"
 
 - name: Install k8 dependencies
   apt:
@@ -62,6 +65,7 @@
     update_cache: True
   with_items:
   - apt-transport-https
+  when: ansible_os_family == "Debian"
 
 - name: install kubernetes
   apt: name={{ item }} state=present allow_unauthenticated=yes
@@ -71,6 +75,7 @@
     - kubeadm
     - kubectl
     - ntp
+  when: ansible_os_family == "Debian"
 
 
 ####################################################

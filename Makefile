@@ -148,6 +148,9 @@ reload:
 run-ansible:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v
 
+run-ansible-docker:
+	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags docker-provision
+
 ping:
 	@ansible -i inventory.ini all -m ping
 
