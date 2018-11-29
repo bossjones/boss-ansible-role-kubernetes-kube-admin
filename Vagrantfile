@@ -10,11 +10,11 @@ NON_ROOT_USER = 'vagrant'.freeze
 
 Vagrant.configure(2) do |config|
   # set auto update to false if you do NOT want to check the correct additions version when booting this machine
-  # config.vbguest.auto_update = true
+  config.vbguest.auto_update = true
 
   config_yml[:vms].each do |name, settings|
     # use the config key as the vm identifier
-    config.vm.define "#{name}", autostart: true, primary: true do |vm_config|
+    config.vm.define name.to_s, autostart: true, primary: true do |vm_config|
       config.ssh.insert_key = false
       vm_config.vm.usable_port_range = (2200..2250)
 
@@ -29,7 +29,7 @@ Vagrant.configure(2) do |config|
       # vm_config.vm.synced_folder '.', '/vagrant', disabled: true
       # But not the centos box
       # vm_config.vm.synced_folder '.', '/home/vagrant/sync', disabled: true
-      vm_config.vm.synced_folder ".", "/shared", type: "nfs"
+      vm_config.vm.synced_folder '.', '/shared', type: 'nfs'
 
       # assign an ip address in the hosts network
       vm_config.vm.network 'private_network', ip: settings[:ip]
@@ -58,9 +58,9 @@ Vagrant.configure(2) do |config|
         # v.customize ['modifyvm', :id, '--natnet1', "168.222.0/24"]
 
         # FIXME: Added today
-        v.customize ["modifyvm", :id, "--ioapic", "on"]
-        v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
-        v.customize ["modifyvm", :id, "--audio", "none"]
+        v.customize ['modifyvm', :id, '--ioapic', 'on']
+        v.customize ['modifyvm', :id, '--paravirtprovider', 'kvm']
+        v.customize ['modifyvm', :id, '--audio', 'none']
       end
 
       # If you want to create an array where each entry is a single word, you can use the %w{} syntax, which creates a word array:
@@ -80,7 +80,7 @@ Vagrant.configure(2) do |config|
         vm_config.hostmanager.aliases = aliases
       end
 
-      if Vagrant.has_plugin?("vagrant-cachier")
+      if Vagrant.has_plugin?('vagrant-cachier')
         # If your Vagrantfile provisions multiple VMs, use the following line instead of auto_detect to prevent collisions:
         config.cache.scope = :machine
         # # If you are using VirtualBox, you might want to enable NFS for shared folders
@@ -91,18 +91,18 @@ Vagrant.configure(2) do |config|
         }
       end
 
-        vm_config.vm.provision 'shell', inline: 'ip address', run: 'always' # make user feel good
-        vm_config.vm.provision 'file', source: 'hosts', destination: 'hosts'
-        # Enable provisioning with a shell script. Additional provisioners such as
-        # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-        # documentation for more information about their specific syntax and use.
+      vm_config.vm.provision 'shell', inline: 'ip address', run: 'always' # make user feel good
+      vm_config.vm.provision 'file', source: 'hosts', destination: 'hosts'
+      # Enable provisioning with a shell script. Additional provisioners such as
+      # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+      # documentation for more information about their specific syntax and use.
 
-        # FIXME: Nuke this config ?? 10/28/2018
-        # vm_config.vm.provision "shell", inline: "HOSTNAME=`hostname`; sudo sed -ri \"/127\.0\.0\.1.*$HOSTNAME.*/d\" /etc/hosts"
+      # FIXME: Nuke this config ?? 10/28/2018
+      # vm_config.vm.provision "shell", inline: "HOSTNAME=`hostname`; sudo sed -ri \"/127\.0\.0\.1.*$HOSTNAME.*/d\" /etc/hosts"
 
-        # TODO: Get rid of /etc/hosts bash script command
-        vm_config.vm.provision 'shell' do |s|
-          s.inline = <<-SHELL
+      # TODO: Get rid of /etc/hosts bash script command
+      vm_config.vm.provision 'shell' do |s|
+        s.inline = <<-SHELL
             if [ -f /vagrant_bootstrap ]; then
               echo "vagrant_bootstrap EXISTS ALREADY"
               exit 0
@@ -110,9 +110,9 @@ Vagrant.configure(2) do |config|
 
             sudo apt-get -y update
             sudo apt-get -y install python-minimal python-apt
-            else
-              echo 'swapfile found. No changes made.'
-            fi
+            HOSTNAME=`hostname`; sudo sed -ri \"/127\.0\.0\.1.*$HOSTNAME.*/d\" /etc/hosts
+
+            cat /etc/hosts
 
             DEBIAN_FRONTEND=noninteractive apt-get update; apt-get install -y \
             sudo \
@@ -128,8 +128,8 @@ Vagrant.configure(2) do |config|
           touch /vagrant_bootstrap && \
           chown #{NON_ROOT_USER}:#{NON_ROOT_USER} /vagrant_bootstrap
           SHELL
-          s.privileged = true
-        end
+        s.privileged = true
+      end
 
       # FIXME: Disable for the moment
       # vm_config.vm.provision :ansible do |ansible|

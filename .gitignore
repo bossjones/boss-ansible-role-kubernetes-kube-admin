@@ -3,3 +3,4 @@
 *.retry
 *~
 ansible/roles/darkedges.commonos/
+*.log

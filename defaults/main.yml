@@ -93,3 +93,11 @@ boss__kubernetes__kubeadm__nfs_exports:
   - path: "/nfsfileshare"
     remote: "/nfsfileshare"
     export: "*(fsid=0,rw,async,no_root_squash,no_subtree_check,insecure)"
+
+
+
+# SOURCE: darkedges.nfs
+nfs_server_group: server
+nfs_client_group: client
+nfs_exports:
+nfs_interface: eth0

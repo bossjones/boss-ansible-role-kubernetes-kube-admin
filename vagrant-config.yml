@@ -27,14 +27,14 @@
     :box: "ubuntu/xenial64"
     :id: 12
 
-  worker3:
-    :hostname: "worker3"
-    # :ip: "10.0.0.13"
-    :ip: "192.168.50.104"
-    :ram: 1024
-    :cpu: 2
-    :box: "ubuntu/xenial64"
-    :id: 13
+  # worker3:
+  #   :hostname: "worker3"
+  #   # :ip: "10.0.0.13"
+  #   :ip: "192.168.50.104"
+  #   :ram: 1024
+  #   :cpu: 2
+  #   :box: "ubuntu/xenial64"
+  #   :id: 13
 
 :groups:
   master:
@@ -42,24 +42,24 @@
   slaves:
     - worker1
     - worker2
-    - worker3
+    # - worker3
   agents:
     - worker1
     - worker2
-    - worker3
+    # - worker3
   servers:
     - master
     - worker1
     - worker2
-    - worker3
+    # - worker3
   kubernetes-master:
     - master
   kubernetes-workers:
     - worker1
     - worker2
-    - worker3
+    # - worker3
   kubernetes:
     - master
     - worker1
     - worker2
-    - worker3
+    # - worker3
