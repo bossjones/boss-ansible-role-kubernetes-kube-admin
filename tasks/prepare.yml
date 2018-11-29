@@ -98,6 +98,7 @@
 - include: prepare-docker.yml
 - include: prepare-iptables.yml
 - include: prepare-kube_config.yml
+- include: prepare-swap.yml
 - include: prepare-ntpd.yml
   when: ntp_setup | default (True)
 - include: prepare-various.yml

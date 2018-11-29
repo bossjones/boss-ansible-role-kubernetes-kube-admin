@@ -75,14 +75,17 @@ boss__kubernetes__kubeadm__package_dependencies:
   - "cron"
   - "apt-utils"
   - "mount"
+  - "jq"
 
 boss__kubernetes__kubeadm__apt_key_id: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
 boss__kubernetes__kubeadm__apt_key_server: "https://download.docker.com/linux/{{ boss__core__distribution | lower }}/gpg"
 boss__kubernetes__kubeadm__apt_cache_time: 86400
 
 
-
 # NOTE: Taken from vagrant-ansible-kubernetes
+kubernetes_interface: "{{ ansible_default_ipv4.interface }}"
+install_nfs: true
+
 boss__kubernetes__kubeadm__kubernetes_interface: "eth1"
 boss__kubernetes__kubeadm__nfs_interface: "{{ kubernetes_interface }}"
 
@@ -100,4 +103,4 @@ boss__kubernetes__kubeadm__nfs_exports:
 nfs_server_group: server
 nfs_client_group: client
 nfs_exports:
-nfs_interface: eth0
+nfs_interface: eth0  # enp0s8 (if vagrant)
