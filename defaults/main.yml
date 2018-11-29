@@ -79,3 +79,17 @@ boss__kubernetes__kubeadm__package_dependencies:
 boss__kubernetes__kubeadm__apt_key_id: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
 boss__kubernetes__kubeadm__apt_key_server: "https://download.docker.com/linux/{{ boss__core__distribution | lower }}/gpg"
 boss__kubernetes__kubeadm__apt_cache_time: 86400
+
+
+
+# NOTE: Taken from vagrant-ansible-kubernetes
+boss__kubernetes__kubeadm__kubernetes_interface: "eth1"
+boss__kubernetes__kubeadm__nfs_interface: "{{ kubernetes_interface }}"
+
+boss__kubernetes__kubeadm__nfs_server_group: kubernetes-master
+boss__kubernetes__kubeadm__nfs_client_group: kubernetes-nodes
+
+boss__kubernetes__kubeadm__nfs_exports:
+  - path: "/nfsfileshare"
+    remote: "/nfsfileshare"
+    export: "*(fsid=0,rw,async,no_root_squash,no_subtree_check,insecure)"

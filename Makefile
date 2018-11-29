@@ -132,3 +132,19 @@ install-deps-all:
 # 	pip install tox-travis
 # tox-install-all-notest:
 # 	tox -e py36 --notest
+
+up:
+	@bash ./scripts/up.sh
+
+rollback:
+	@bash ./scripts/rollback.sh
+
+run-ansible:
+	@ansible-playbook -i inventory kubernetes.yml -v
+
+# [ANSIBLE0013] Use shell only when shell functionality is required
+ansible-lint-role:
+	bash -c "find .* -type f -name '*.y*ml' ! -name '*.venv' -print0 | xargs -I FILE -t -0 -n1 ansible-lint -x ANSIBLE0006,ANSIBLE0007,ANSIBLE0010,ANSIBLE0013 FILE"
+
+yamllint-role:
+	bash -c "find .* -type f -name '*.y*ml' ! -name '*.venv' -print0 | xargs -I FILE -t -0 -n1 yamllint FILE"

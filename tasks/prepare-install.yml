@@ -1,0 +1,157 @@
+####################################################
+# - include_tasks: install.yml
+####################################################
+
+# SOURCE: https://github.com/containerd/cri/blob/master/contrib/ansible/tasks/bootstrap_ubuntu.yaml
+- name: "Install required packages on Ubuntu"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+      - unzip
+      - tar
+      - apt-transport-https
+      - btrfs-tools
+      - libseccomp2
+      - socat
+      - util-linux
+      - ntp
+
+- name: add the kubernetes apt repo key
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+  environment: '{{ proxy_env | default ({}) }}'
+  when: ansible_os_family == "Debian"
+
+- name: add the kubernetes apt repo
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} main"
+    update_cache: True
+    state: present
+  environment: '{{ proxy_env | default ({}) }}'
+  when: ansible_os_family == "Debian"
+
+- name: apt-get clean metadata
+  command: apt-get clean ; apt-file purge
+  args:
+    warn: no
+  when: ansible_os_family == "Debian" and package_state is defined and package_state == "latest"
+
+# End OS dependent repo setup
+
+### socat
+- name: Install socat from centos/rhel/ubuntu repo
+  package: name={{ item }} state={{ package_state | default ('latest') }}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - socat
+
+# - name: install kubernetes
+#   apt: name={{ item }} state=present allow_unauthenticated=yes
+#   with_items:
+#     # - docker.io
+#     - kubelet
+#     - kubeadm
+#     - kubectl
+#     - ntp
+
+### kubelet
+- name: Install kubelet
+  package: name={{ item }} state={{ package_state | default ('latest') }}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubelet
+  when: kubelet_version is not defined
+
+- name: Install kubelet
+  package: name="{{ item }}={{kubelet_version | regex_replace('v')}}*" state=installed
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubelet
+  when: kubelet_version is defined and ( kubelet_version!='installed' or kubelet_version!='latest' ) and ansible_os_family == "Debian"
+
+- name: Install kubelet
+  package: name="{{ item }}-{{kubelet_version | regex_replace('v')}}" state=installed
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubelet
+  when: kubelet_version is defined and ( kubelet_version!='installed' or kubelet_version!='latest' ) and ansible_os_family == "RedHat"
+
+- name: Install kubelet
+  package: name={{ item }} state={{kubelet_version}}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubelet
+  when: kubelet_version is defined and ( kubelet_version=='installed' or kubelet_version=='latest' )
+
+##############
+### kubectl
+- name: Install kubectl
+  package: name={{ item }} state={{ package_state | default ('latest') }}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubectl
+  when: kubectl_version is not defined
+
+- name: Install kubectl # ansible bug 29705
+  package: name="{{ item }}={{kubectl_version | regex_replace('v')}}*" state=installed
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubectl
+  when: kubectl_version is defined and ( kubectl_version!='installed' or kubectl_version!='latest' ) and ansible_os_family == "Debian"
+
+- name: Install kubectl
+  package: name="{{ item }}-{{kubectl_version | regex_replace('v')}}" state=installed
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubectl
+  when: kubectl_version is defined and ( kubectl_version!='installed' or kubectl_version!='latest' ) and ansible_os_family == "RedHat"
+
+- name: Install kubectl
+  package: name={{ item }} state={{kubectl_version}}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubectl
+  when: kubectl_version is defined and ( kubectl_version=='installed' or kubectl_version=='latest' )
+
+#############
+### kubeadm
+- name: Install kubeadm
+  package: name={{ item }} state={{ package_state | default ('latest') }}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubeadm
+  when: kubeadm_version is not defined
+
+- name: Install kubeadm # ansible bug 29705
+  package: name="{{ item }}={{kubeadm_version | regex_replace('v')}}*" state=installed
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubeadm
+  when: kubeadm_version is defined and ( kubeadm_version!='installed' or kubeadm_version!='latest' ) and ansible_os_family == "Debian"
+
+- name: Install kubeadm
+  package: name={{ item }}-{{kubeadm_version | regex_replace('v')}} state=installed
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubeadm
+  when: kubeadm_version is defined and ( kubeadm_version!='installed' or kubeadm_version!='latest' ) and ansible_os_family == "RedHat"
+
+- name: Install kubeadm
+  package: name={{ item }} state={{kubeadm_version}}
+  #environment: '{{ proxy_env | default ({}) }}'
+  with_items:
+  - kubeadm
+  when: kubeadm_version is defined and ( kubeadm_version=='installed' or kubeadm_version=='latest' )
+
+#- name: Install packages
+#  package: name={{ item }} state={{ package_state | default ('latest') }}
+#  environment: '{{ proxy_env | default ({}) }}'
+#  with_items:
+  #- kubernetes-cni # already installed by kubelet anyway
+  #- docker # for RH, but could be installed manually, so no checks here.
+  #- kubeadm
+  #- docker.io # for ubuntu
+
+

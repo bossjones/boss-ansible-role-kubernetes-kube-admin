@@ -1,34 +1,80 @@
 ---
-# no_log: true
-- hosts: servers
-  gather_facts: True
+# FIXME: Copied from kubeadm-playbook, 11/28/2018
+## Preparations
+## Making sure python exists on all nodes, so Ansible will be able to run:
+- hosts: all
+  gather_facts: no
   become: yes
   become_method: sudo
-  tags:
-    - bootstrap
-  roles:
-    - role: boss-ansible-role-bootstrap
-    - role: boss-ansible-role-core
-    - role: boss-ansible-role-fact
-    - role: boss-ansible-role-environment
-    - role: boss-ansible-role-etckeeper
+  pre_tasks:
+  - name: Install python2 for Ansible (usually required on ubuntu, which defaults to python3) # Alternativelly, for Ubuntu machines, define var: ansible_python_interpreter=/usr/bin/python3
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal) || (yum install -y python2 python-simplejson)
+    register: output
+    changed_when: output.stdout != ""
+    tags: always
 
-- hosts: servers
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  tags:
-    - docker
-  roles:
-    - role: geerlingguy.pip
-    - role: ../
-      boss__kubernetes__kubeadm__install_method: "shell"
+  - setup: # aka gather_facts
+    tags: always # required for tags, see ansible issue: #14228
 
-- hosts: dns_servers
-  gather_facts: True
+  - name: test min. vars (group_vars/all) are set (ClusterConfiguration and k8s_network_addons_urls)
+    debug: msg='Make sure min. vars are set in group_vars/all/ (e.g. ClusterConfiguration and k8s_network_addons_urls)'
+    when:
+    - ClusterConfiguration is not defined
+    - JoinConfiguration is not defined
+    failed_when:
+    - ClusterConfiguration is not defined
+    - JoinConfiguration is not defined
+    tags: always # always check if we have vars in place
+
+
+
+
+# # no_log: true
+# - hosts: servers
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   tags:
+#     - bootstrap
+#   roles:
+#     - role: boss-ansible-role-bootstrap
+#     - role: boss-ansible-role-core
+#     - role: boss-ansible-role-fact
+#     - role: boss-ansible-role-environment
+#     - role: boss-ansible-role-etckeeper
+
+# - hosts: servers
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   tags:
+#     - docker
+#   roles:
+#     - role: geerlingguy.pip
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "shell"
+
+# - hosts: dns_servers
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   tags:
+#     - debug
+#   roles:
+#     - role: boss-ansible-role-debug
+
+
+
+## proper reset of any previous cluster (if any)
+- hosts: primary-master
   become: yes
   become_method: sudo
   tags:
-    - debug
+  - reset
+  - master
   roles:
-    - role: boss-ansible-role-debug
+  - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
+  - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
+  - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
+  - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
+  - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes

@@ -1,8 +1,34 @@
 ---
-- name: restart kubelet
-  service: "name=kubelet state={{ boss__kubernetes__kubeadm__restart_handler_state }}"
+# - name: restart kubelet
+#   service: "name=kubelet state={{ boss__kubernetes__kubeadm__restart_handler_state }}"
+
+# - name: Restart kubelet
+#   service:
+#     name: "kubelet"
+#     state: "restarted"
+
+- name: Restart docker
+  systemd: name=docker state="{{ boss__kubernetes__kubeadm__restart_handler_state }}" enabled=yes
+
+- name: Restart docker-storage-setup
+  systemd: name=docker-storage-setup state="{{ boss__kubernetes__kubeadm__restart_handler_state }}"
+
+- name: Reload systemd
+  command: systemctl daemon-reload
 
 - name: Restart kubelet
-  service:
-    name: "kubelet"
-    state: "restarted"
+  systemd: name=kubelet state="{{ boss__kubernetes__kubeadm__restart_handler_state }}" enabled=yes daemon_reload=yes
+
+#Debian is ntp, RedHat ntpd
+#- name: Restart ntpd
+#  systemd: name=ntpd state="{{ boss__kubernetes__kubeadm__restart_handler_state }}" enabled=yes
+
+- name: Restart iptables
+  systemd: name=iptables state="{{ boss__kubernetes__kubeadm__restart_handler_state }}" enabled=yes
+
+- name: Reboot
+  shell: sleep 2 && /sbin/shutdown -r now
+  async: 1
+  poll: 0
+  ignore_errors: yes
+  when: allow_restart | default ( false )

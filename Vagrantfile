@@ -7,7 +7,6 @@ require 'yaml'
 config_yml = YAML.load_file(File.open(__dir__ + '/vagrant-config.yml'))
 
 NON_ROOT_USER = 'vagrant'.freeze
-SWAPSIZE = 1000
 
 Vagrant.configure(2) do |config|
   # set auto update to false if you do NOT want to check the correct additions version when booting this machine
@@ -15,7 +14,7 @@ Vagrant.configure(2) do |config|
 
   config_yml[:vms].each do |name, settings|
     # use the config key as the vm identifier
-    config.vm.define(name) do |vm_config|
+    config.vm.define "#{name}", autostart: true, primary: true do |vm_config|
       config.ssh.insert_key = false
       vm_config.vm.usable_port_range = (2200..2250)
 
@@ -27,9 +26,10 @@ Vagrant.configure(2) do |config|
       # Vagrant can share the source directory using rsync, NFS, or SSHFS (with the vagrant-sshfs
       # plugin). Consult the Vagrant documentation if you do not want to use SSHFS.
       # Get's honored normally
-      vm_config.vm.synced_folder '.', '/vagrant', disabled: true
+      # vm_config.vm.synced_folder '.', '/vagrant', disabled: true
       # But not the centos box
-      vm_config.vm.synced_folder '.', '/home/vagrant/sync', disabled: true
+      # vm_config.vm.synced_folder '.', '/home/vagrant/sync', disabled: true
+      vm_config.vm.synced_folder ".", "/shared", type: "nfs"
 
       # assign an ip address in the hosts network
       vm_config.vm.network 'private_network', ip: settings[:ip]
@@ -47,7 +47,7 @@ Vagrant.configure(2) do |config|
         # Prevent clock drift, see http://stackoverflow.com/a/19492466/323407
         v.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10_000]
 
-        v.customize ['modifyvm', :id, '--macaddress1', '5CA1AB1E00' + node[:id]]
+        v.customize ['modifyvm', :id, '--macaddress1', '5CA1AB1E00' + settings[:id].to_s]
 
         # SOURCE: https://www.virtualbox.org/manual/ch09.html#changenat
         # NOTE:  # do not use 10.x network for NAT ?
@@ -55,21 +55,40 @@ Vagrant.configure(2) do |config|
         # NOTE: If, for any reason, the NAT network needs to be changed, this can be achieved with the following command: VBoxManage modifyvm "VM name" --natnet1 "192.168/16"
         # SOURCE: https://github.com/hashicorp/vagrant/issues/2915#issuecomment-147026214
         # ORIG # v.customize ['modifyvm', :id, '--natnet1', "192.168/16"]
-        v.customize ['modifyvm', :id, '--natnet1', "168.222.0/24"]
+        # v.customize ['modifyvm', :id, '--natnet1', "168.222.0/24"]
+
+        # FIXME: Added today
+        v.customize ["modifyvm", :id, "--ioapic", "on"]
+        v.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+        v.customize ["modifyvm", :id, "--audio", "none"]
       end
 
       # If you want to create an array where each entry is a single word, you can use the %w{} syntax, which creates a word array:
       # However, notice that the %w{} method lets you skip the quotes and the commas.
-      hostname_with_hyenalab_tld = "#{settings[:hostname]}.hyenalab.home"
+      hostname_with_scarlettlab_tld = "#{settings[:hostname]}.scarlettlab.home"
 
-      aliases = [hostname_with_hyenalab_tld, settings[:hostname]]
+      aliases = [hostname_with_scarlettlab_tld, settings[:hostname]]
 
       if Vagrant.has_plugin?('vagrant-hostsupdater')
         vm_config.hostsupdater.aliases = aliases
       elsif Vagrant.has_plugin?('vagrant-hostmanager')
         vm_config.hostmanager.enabled = true
         vm_config.hostmanager.manage_host = true
+        vm_config.hostmanager.manage_guests = true
+        vm_config.hostmanager.ignore_private_ip = false
+        vm_config.hostmanager.include_offline = true
         vm_config.hostmanager.aliases = aliases
+      end
+
+      if Vagrant.has_plugin?("vagrant-cachier")
+        # If your Vagrantfile provisions multiple VMs, use the following line instead of auto_detect to prevent collisions:
+        config.cache.scope = :machine
+        # # If you are using VirtualBox, you might want to enable NFS for shared folders
+        # config.cache.enable_nfs  = true
+        config.cache.synced_folder_opts = {
+          type: :nfs,
+          mount_options: ['rw', 'vers=3', 'udp', 'nolock', 'noatime']
+        }
       end
 
         vm_config.vm.provision 'shell', inline: 'ip address', run: 'always' # make user feel good
@@ -77,6 +96,9 @@ Vagrant.configure(2) do |config|
         # Enable provisioning with a shell script. Additional provisioners such as
         # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
         # documentation for more information about their specific syntax and use.
+
+        # FIXME: Nuke this config ?? 10/28/2018
+        # vm_config.vm.provision "shell", inline: "HOSTNAME=`hostname`; sudo sed -ri \"/127\.0\.0\.1.*$HOSTNAME.*/d\" /etc/hosts"
 
         # TODO: Get rid of /etc/hosts bash script command
         vm_config.vm.provision 'shell' do |s|
@@ -103,26 +125,26 @@ Vagrant.configure(2) do |config|
           ; \
             DEBIAN_FRONTEND=noninteractive apt-get install -y python-six python-pip \
           ; \
-                rm -rf /var/lib/apt/lists/*
           touch /vagrant_bootstrap && \
           chown #{NON_ROOT_USER}:#{NON_ROOT_USER} /vagrant_bootstrap
           SHELL
           s.privileged = true
         end
 
-      vm_config.vm.provision :ansible do |ansible|
-        ansible.host_key_checking	= 'false'
-        # Disable default limit to connect to all the machines
-        ansible.limit = 'all'
-        ansible.playbook = 'vagrant_playbook.yml'
-        ansible.groups = config_yml[:groups]
-        ansible.verbose = 'vvv'
-        ansible.extra_vars = {
-          deploy_env: 'vagrant'
-        }
-        # ansible.skip_tags = %w[bootstrap]
-        ansible.raw_arguments = ["--forks=10"]
-      end
+      # FIXME: Disable for the moment
+      # vm_config.vm.provision :ansible do |ansible|
+      #   ansible.host_key_checking	= 'false'
+      #   # Disable default limit to connect to all the machines
+      #   ansible.limit = 'all'
+      #   ansible.playbook = 'vagrant_playbook.yml'
+      #   ansible.groups = config_yml[:groups]
+      #   ansible.verbose = 'vvv'
+      #   ansible.extra_vars = {
+      #     deploy_env: 'vagrant'
+      #   }
+      #   # ansible.skip_tags = %w[bootstrap]
+      #   ansible.raw_arguments = ["--forks=10"]
+      # end
     end
   end
 end

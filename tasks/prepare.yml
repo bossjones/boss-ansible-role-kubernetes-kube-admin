@@ -83,3 +83,34 @@
 - service: name=ntp state=started enabled=yes
 
 - service: name=kubelet state=started enabled=yes
+
+
+# TODO: [11/28/2018] When we are ready, run this to setup everything, and comment everything above out!
+# - include: prepare-kernel_modules.yml
+#    when: kernel_modules_setup | default (True)
+# - include: prepare-install.yml
+# - include: prepare-configure.yml
+# - include: prepare-docker.yml
+# - include: prepare-iptables.yml
+# - include: prepare-kube_config.yml
+# - include: prepare-ntpd.yml
+#   when: ntp_setup | default (True)
+# - include: prepare-various.yml
+# - include: prepare-completion.yml
+
+
+# - include: selinux.yml # THIS MIGHT REBOOT MACHINE!!!
+# - include: install_k8s_packages.yml
+# - include: docker.yml
+# - include: iptables.yml
+# - include: firewalld.yml
+# - include: kube_config.yml
+# - include: swap.yml
+# - include: kernel_modules.yml
+#   when: kernel_modules_setup | default (True)
+# - include: ntpd.yml
+#   when: ntp_setup | default (True)
+# - include: rook.yml
+#   when: rook is defined and rook.enabled | default (False)
+# - include: various.yml
+# - include: alias_completion.yml

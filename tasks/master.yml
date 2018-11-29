@@ -2,6 +2,8 @@
 # - include_tasks: init.yml
 ####################################################
 
+# FIXME: we need to switch out all of the hardcoded values! ( 11/28/2018 )
+
 - lineinfile: dest=/etc/sysctl.conf line='net.bridge.bridge-nf-call-ip6tables = 1' state=present
 - lineinfile: dest=/etc/sysctl.conf line='net.bridge.bridge-nf-call-iptables = 1' state=present
 - name: initialize kube

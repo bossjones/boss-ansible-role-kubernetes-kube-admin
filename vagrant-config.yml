@@ -2,33 +2,37 @@
 :vms:
   master:
     :hostname: "master"
-    :ip: "10.0.0.10"
+    # :ip: "10.0.0.10"
+    :ip: "192.168.50.101"
     :ram: 1024
-    :cpu: 1
+    :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 10
 
-  node1:
-    :hostname: "node1"
-    :ip: "10.0.0.11"
+  worker1:
+    :hostname: "worker1"
+    # :ip: "10.0.0.11"
+    :ip: "192.168.50.102"
     :ram: 1024
-    :cpu: 1
+    :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 11
 
-  node2:
-    :hostname: "node2"
-    :ip: "10.0.0.12"
+  worker2:
+    :hostname: "worker2"
+    # :ip: "10.0.0.12"
+    :ip: "192.168.50.103"
     :ram: 1024
-    :cpu: 1
+    :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 12
 
-  node3:
-    :hostname: "node3"
-    :ip: "10.0.0.13"
+  worker3:
+    :hostname: "worker3"
+    # :ip: "10.0.0.13"
+    :ip: "192.168.50.104"
     :ram: 1024
-    :cpu: 1
+    :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 13
 
@@ -36,15 +40,26 @@
   master:
     - master
   slaves:
-    - node1
-    - node2
-    - node3
+    - worker1
+    - worker2
+    - worker3
   agents:
-    - node1
-    - node2
-    - node3
+    - worker1
+    - worker2
+    - worker3
   servers:
     - master
-    - node1
-    - node2
-    - node3
+    - worker1
+    - worker2
+    - worker3
+  kubernetes-master:
+    - master
+  kubernetes-workers:
+    - worker1
+    - worker2
+    - worker3
+  kubernetes:
+    - master
+    - worker1
+    - worker2
+    - worker3
