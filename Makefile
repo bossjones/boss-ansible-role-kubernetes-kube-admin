@@ -146,7 +146,7 @@ reload:
 	@vagrant reload
 
 run-ansible:
-	@ansible-playbook -i inventory kubernetes.yml -v
+	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v
 
 # [ANSIBLE0013] Use shell only when shell functionality is required
 ansible-lint-role:

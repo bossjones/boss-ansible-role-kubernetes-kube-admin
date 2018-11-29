@@ -26,9 +26,6 @@
     - JoinConfiguration is not defined
     tags: always # always check if we have vars in place
 
-
-
-
 # # no_log: true
 # - hosts: servers
 #   gather_facts: True
@@ -66,15 +63,15 @@
 
 
 ## proper reset of any previous cluster (if any)
-- hosts: primary-master
-  become: yes
-  become_method: sudo
-  tags:
-  - reset
-  - master
-  roles:
-  - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
-  - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
-  - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
-  - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
-  - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes
+# - hosts: primary-master
+#   become: yes
+#   become_method: sudo
+#   tags:
+#   - reset
+#   - master
+#   roles:
+#   - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
+#   - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
+#   - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
+#   - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
+#   - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes
