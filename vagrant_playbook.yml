@@ -2,7 +2,7 @@
 # FIXME: Copied from kubeadm-playbook, 11/28/2018
 ## Preparations
 ## Making sure python exists on all nodes, so Ansible will be able to run:
-- hosts: all
+- hosts: servers
   gather_facts: no
   become: yes
   become_method: sudo
@@ -27,18 +27,18 @@
     tags: always # always check if we have vars in place
 
 # # no_log: true
-# - hosts: servers
-#   gather_facts: True
-#   become: yes
-#   become_method: sudo
-#   tags:
-#     - bootstrap
-#   roles:
-#     - role: boss-ansible-role-bootstrap
-#     - role: boss-ansible-role-core
-#     - role: boss-ansible-role-fact
-#     - role: boss-ansible-role-environment
-#     - role: boss-ansible-role-etckeeper
+- hosts: servers
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  tags:
+    - bootstrap
+  roles:
+    - role: boss-ansible-role-bootstrap
+    - role: boss-ansible-role-core
+    - role: boss-ansible-role-fact
+    - role: boss-ansible-role-environment
+    - role: boss-ansible-role-etckeeper
 
 # - hosts: servers
 #   gather_facts: True

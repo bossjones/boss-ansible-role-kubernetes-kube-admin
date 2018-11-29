@@ -148,6 +148,9 @@ reload:
 run-ansible:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v
 
+ping:
+	@ansible -i inventory.ini all -m ping
+
 # [ANSIBLE0013] Use shell only when shell functionality is required
 ansible-lint-role:
 	bash -c "find .* -type f -name '*.y*ml' ! -name '*.venv' -print0 | xargs -I FILE -t -0 -n1 ansible-lint -x ANSIBLE0006,ANSIBLE0007,ANSIBLE0010,ANSIBLE0013 FILE"
