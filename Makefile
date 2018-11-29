@@ -139,6 +139,12 @@ up:
 rollback:
 	@bash ./scripts/rollback.sh
 
+commit:
+	vagrant sandbox commit
+
+reload:
+	@vagrant reload
+
 run-ansible:
 	@ansible-playbook -i inventory kubernetes.yml -v
 

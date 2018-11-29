@@ -10,7 +10,7 @@ NON_ROOT_USER = 'vagrant'.freeze
 
 Vagrant.configure(2) do |config|
   # set auto update to false if you do NOT want to check the correct additions version when booting this machine
-  config.vbguest.auto_update = true
+  # config.vbguest.auto_update = true
 
   config_yml[:vms].each do |name, settings|
     # use the config key as the vm identifier
