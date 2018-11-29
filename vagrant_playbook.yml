@@ -59,17 +59,24 @@
         - "--dns 8.8.8.8 -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
       boss__docker__install_method: "shell"
 
-# - hosts: servers
-#   gather_facts: True
-#   become: yes
-#   become_method: sudo
-#   tags:
-#     - docker
-#     - docker-provision
-#   roles:
-#     # - role: geerlingguy.pip
-#     - role: ../
-#       boss__kubernetes__kubeadm__install_method: "shell"
+- hosts: primary-master
+  name: primary-master (or master in general) - it applies to both ha and non-ha
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  # TODO: remove this 11/28/2018
+  any_errors_fatal: yes
+  tags:
+  - master
+  - install
+  - master_install
+  - ha
+  roles:
+    # - role: geerlingguy.pip
+    - role: ../
+      boss__kubernetes__kubeadm__install_method: "shell"
+      tags: [ 'primary-master', 'master', 'install', 'master_install']
+      task: prepare
 
 # - hosts: dns_servers
 #   gather_facts: True
