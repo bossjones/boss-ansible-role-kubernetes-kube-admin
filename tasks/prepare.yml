@@ -1,107 +1,107 @@
-####################################################
-# - include_tasks: modules.yml
-####################################################
+# ####################################################
+# # - include_tasks: modules.yml
+# ####################################################
 
-- name: Enable required kernel modules via modprobe
-  modprobe:
-    name: "{{item}}"
-    state: present
-  with_items:
-  - ip_vs
-  - ip_vs_rr
-  - ip_vs_wrr
-  - ip_vs_sh
-  - nf_conntrack_ipv4
+# - name: Enable required kernel modules via modprobe
+#   modprobe:
+#     name: "{{item}}"
+#     state: present
+#   with_items:
+#   - ip_vs
+#   - ip_vs_rr
+#   - ip_vs_wrr
+#   - ip_vs_sh
+#   - nf_conntrack_ipv4
 
-# FIXME: We might not need this!!
-- name: Add kernel modules to /etc/modules required kernel modules via modprobe. NOTE WE MIGHT NOT NEED THIS
-  lineinfile:
-    path: /etc/modules
-    line: '{{item}}'
-    create: yes
-    state: present
-  with_items:
-  - ip_vs
-  - ip_vs_rr
-  - ip_vs_wrr
-  - ip_vs_sh
-  - nf_conntrack_ipv4
+# # FIXME: We might not need this!!
+# - name: Add kernel modules to /etc/modules required kernel modules via modprobe. NOTE WE MIGHT NOT NEED THIS
+#   lineinfile:
+#     path: /etc/modules
+#     line: '{{item}}'
+#     create: yes
+#     state: present
+#   with_items:
+#   - ip_vs
+#   - ip_vs_rr
+#   - ip_vs_wrr
+#   - ip_vs_sh
+#   - nf_conntrack_ipv4
 
-####################################################
-# - include_tasks: install.yml
-####################################################
+# ####################################################
+# # - include_tasks: install.yml
+# ####################################################
 
-# SOURCE: https://github.com/containerd/cri/blob/master/contrib/ansible/tasks/bootstrap_ubuntu.yaml
-- name: "Install required packages on Ubuntu"
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-      - unzip
-      - tar
-      - apt-transport-https
-      - btrfs-tools
-      - libseccomp2
-      - socat
-      - util-linux
-  when: ansible_os_family == "Debian"
+# # SOURCE: https://github.com/containerd/cri/blob/master/contrib/ansible/tasks/bootstrap_ubuntu.yaml
+# - name: "Install required packages on Ubuntu"
+#   package:
+#     name: "{{ item }}"
+#     state: present
+#   with_items:
+#       - unzip
+#       - tar
+#       - apt-transport-https
+#       - btrfs-tools
+#       - libseccomp2
+#       - socat
+#       - util-linux
+#   when: ansible_os_family == "Debian"
 
-- name: add the kubernetes apt repo key
-  apt_key:
-    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
-    state: present
-  when: ansible_os_family == "Debian"
+# - name: add the kubernetes apt repo key
+#   apt_key:
+#     url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+#     state: present
+#   when: ansible_os_family == "Debian"
 
-- name: add the kubernetes apt repo
-  apt_repository:
-    repo: "deb http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} main"
-    update_cache: True
-    state: present
-  when: ansible_os_family == "Debian"
+# - name: add the kubernetes apt repo
+#   apt_repository:
+#     repo: "deb http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} main"
+#     update_cache: True
+#     state: present
+#   when: ansible_os_family == "Debian"
 
-- name: Install k8 dependencies
-  apt:
-    name: "{{ item }}"
-    update_cache: True
-  with_items:
-  - apt-transport-https
-  when: ansible_os_family == "Debian"
+# - name: Install k8 dependencies
+#   apt:
+#     name: "{{ item }}"
+#     update_cache: True
+#   with_items:
+#   - apt-transport-https
+#   when: ansible_os_family == "Debian"
 
-- name: install kubernetes
-  apt: name={{ item }} state=present allow_unauthenticated=yes
-  with_items:
-    # - docker.io
-    - kubelet
-    - kubeadm
-    - kubectl
-    - ntp
-  when: ansible_os_family == "Debian"
+# - name: install kubernetes
+#   apt: name={{ item }} state=present allow_unauthenticated=yes
+#   with_items:
+#     # - docker.io
+#     - kubelet
+#     - kubeadm
+#     - kubectl
+#     - ntp
+#   when: ansible_os_family == "Debian"
 
 
-####################################################
-# - include_tasks: configure.yml
-####################################################
+# ####################################################
+# # - include_tasks: configure.yml
+# ####################################################
 
-- name: net.ipv4.ip_forward=1
-  sysctl: name=net.ipv4.ip_forward value=1 state=present reload=yes sysctl_set=yes
+# - name: net.ipv4.ip_forward=1
+#   sysctl: name=net.ipv4.ip_forward value=1 state=present reload=yes sysctl_set=yes
 
-- service: name=ntp state=started enabled=yes
+# - service: name=ntp state=started enabled=yes
 
-- service: name=kubelet state=started enabled=yes
+# - service: name=kubelet state=started enabled=yes
 
 
 # TODO: [11/28/2018] When we are ready, run this to setup everything, and comment everything above out!
-# - include: prepare-kernel_modules.yml
-#    when: kernel_modules_setup | default (True)
-# - include: prepare-install.yml
-# - include: prepare-configure.yml
-# - include: prepare-docker.yml
-# - include: prepare-iptables.yml
-# - include: prepare-kube_config.yml
-# - include: prepare-ntpd.yml
-#   when: ntp_setup | default (True)
-# - include: prepare-various.yml
-# - include: prepare-completion.yml
+- include: prepare-kernel_modules.yml
+  when: kernel_modules_setup | default (True)
+- include: prepare-install.yml
+- include: prepare-configure.yml
+- include: prepare-docker.yml
+- include: prepare-iptables.yml
+- include: prepare-kube_config.yml
+- include: prepare-ntpd.yml
+  when: ntp_setup | default (True)
+- include: prepare-various.yml
+- include: prepare-completion.yml
 
 
 # - include: selinux.yml # THIS MIGHT REBOOT MACHINE!!!
