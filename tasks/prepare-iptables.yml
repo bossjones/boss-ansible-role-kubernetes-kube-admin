@@ -6,6 +6,11 @@
   # https://github.com/kubernetes/contrib/blob/master/ansible/roles/node/tasks/iptables.yml
   # For weave netw plugin, open also: TCP 6783 and UDP 6783/6784
 
+  - name: Disable ufw (debian)
+    systemd: name=ufw state=stopped enabled=no
+    when:  ansible_os_family == "Debian"
+    ignore_errors: yes  # in case it is not even installed
+
   - name: Disable firewalld (CentOS/RHEL)
     systemd: name=firewalld state=stopped enabled=no
     when:  ansible_os_family == "RedHat"

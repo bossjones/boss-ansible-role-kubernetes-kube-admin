@@ -15,8 +15,8 @@
       - libseccomp2
       - socat
       - util-linux
-      - ntp
-      - ntpdate
+      # - ntp
+      # - ntpdate
 
 - name: add the kubernetes apt repo key
   apt_key:
