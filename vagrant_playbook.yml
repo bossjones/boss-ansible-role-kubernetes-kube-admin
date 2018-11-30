@@ -66,6 +66,12 @@
         # NOTE: RUN THIS GUY
         - mtr
         - tmux
+        # SOURCE: https://www.tecmint.com/test-network-throughput-in-linux/
+        - iperf3
+        # SOURCE: https://www.tecmint.com/tcpflow-analyze-debug-network-traffic-in-linux/
+        - tcpflow
+        # SOURCE: https://www.tecmint.com/linux-network-bandwidth-monitoring-tools/
+        - iftop
 
   # SOURCE: https://gist.github.com/kometchtech/c5681b2a70b30c99bf7e834ffb3abba5
   - name: "Install dnsperf prereqs"
@@ -83,10 +89,18 @@
         - libgeoip-dev
         - build-essential
         - curl
+        # REQUIRED: https://www.tecmint.com/hegemon-system-monitoring-tool-for-linux/
+        - libsensors4-dev
 
-  - name: "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
+  - name: "SYSDIG: curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
     shell: |
       bash -lc "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
+    args:
+      executable: /bin/bash
+
+  - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh"
+    shell: |
+      bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
     args:
       executable: /bin/bash
 
@@ -96,6 +110,15 @@
     command: cat /etc/hosts
     args:
       warn: no
+
+##############################################################################
+# Install osquery
+##############################################################################
+# $ export OSQUERY_KEY=1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
+# $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $OSQUERY_KEY
+# $ sudo add-apt-repository 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'
+# $ sudo apt update
+# $ sudo apt install osquery
 
 ##############################################################################
 # bootstrap common roles
