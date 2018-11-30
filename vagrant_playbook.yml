@@ -54,82 +54,88 @@
         - netperf
         - ngrep
         - nload
-  roles:
-    - role: boss-ansible-role-bootstrap
-    - role: boss-ansible-role-core
-    - role: boss-ansible-role-fact
-    - role: boss-ansible-role-environment
-    - role: boss-ansible-role-etckeeper
-    - role: boss-ansible-role-debug
-    - role: boss-ansible-role-update-hosts
-      boss__update__hosts__hosts_file: /etc/hosts
-      boss__update__hosts__ansible_group: "servers"
-      boss__update__hosts__networking_interface: "enp0s8"
+        - ncdu
+        - traceroute
+        - sysstat
+        # NOTE: RUN THIS GUY
+        - mtr
+        - tmux
+#   roles:
+#     - role: boss-ansible-role-bootstrap
+#     - role: boss-ansible-role-core
+#     - role: boss-ansible-role-fact
+#     - role: boss-ansible-role-environment
+#     - role: boss-ansible-role-etckeeper
+#     - role: boss-ansible-role-debug
+#     - role: boss-ansible-role-update-hosts
+#       boss__update__hosts__hosts_file: /etc/hosts
+#       boss__update__hosts__ansible_group: "servers"
+#       boss__update__hosts__networking_interface: "enp0s8"
 
-  tasks:
+#   tasks:
 
-  - name: cat /etc/hosts
-    command: cat /etc/hosts
-    args:
-      warn: no
+#   - name: cat /etc/hosts
+#     command: cat /etc/hosts
+#     args:
+#       warn: no
 
-# # no_log: true
-- hosts: servers
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  tags:
-    - docker
-    - docker-provision
-  roles:
-    - role: geerlingguy.pip
-    - role: boss-ansible-role-docker
-      # boss__docker__version: "18.06"
-      boss__docker__users: ["vagrant"]
-      boss__docker__daemon_options:
-        - "--dns 8.8.8.8 -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
-      boss__docker__install_method: "shell"
-
-# - hosts: primary-master
-#   name: primary-master (or master in general) - it applies to both ha and non-ha
+# # # no_log: true
+# - hosts: servers
 #   gather_facts: True
 #   become: yes
 #   become_method: sudo
-#   # TODO: remove this 11/28/2018
-#   any_errors_fatal: yes
 #   tags:
-#   - master
-#   - install
-#   - master_install
-#   - ha
+#     - docker
+#     - docker-provision
 #   roles:
-#     - role: ../
-#       boss__kubernetes__kubeadm__install_method: "shell"
-#       tags: [ 'primary-master', 'master', 'install', 'master_install']
-#       task: prepare
-#       boss__kubernetes__kubeadm__run_prepare: True
+#     - role: geerlingguy.pip
+#     - role: boss-ansible-role-docker
+#       # boss__docker__version: "18.06"
+#       boss__docker__users: ["vagrant"]
+#       boss__docker__daemon_options:
+#         - "--dns 8.8.8.8 -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
+#       boss__docker__install_method: "shell"
 
-# # # - hosts: dns_servers
-# # #   gather_facts: True
-# # #   become: yes
-# # #   become_method: sudo
-# # #   tags:
-# # #     - debug
-# # #   roles:
-# # #     - role: boss-ansible-role-debug
+# # - hosts: primary-master
+# #   name: primary-master (or master in general) - it applies to both ha and non-ha
+# #   gather_facts: True
+# #   become: yes
+# #   become_method: sudo
+# #   # TODO: remove this 11/28/2018
+# #   any_errors_fatal: yes
+# #   tags:
+# #   - master
+# #   - install
+# #   - master_install
+# #   - ha
+# #   roles:
+# #     - role: ../
+# #       boss__kubernetes__kubeadm__install_method: "shell"
+# #       tags: [ 'primary-master', 'master', 'install', 'master_install']
+# #       task: prepare
+# #       boss__kubernetes__kubeadm__run_prepare: True
+
+# # # # - hosts: dns_servers
+# # # #   gather_facts: True
+# # # #   become: yes
+# # # #   become_method: sudo
+# # # #   tags:
+# # # #     - debug
+# # # #   roles:
+# # # #     - role: boss-ansible-role-debug
 
 
 
-# # ## proper reset of any previous cluster (if any)
-# # # - hosts: primary-master
-# # #   become: yes
-# # #   become_method: sudo
-# # #   tags:
-# # #   - reset
-# # #   - master
-# # #   roles:
-# # #   - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
-# # #   - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
-# # #   - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
-# # #   - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
-# # #   - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes
+# # # ## proper reset of any previous cluster (if any)
+# # # # - hosts: primary-master
+# # # #   become: yes
+# # # #   become_method: sudo
+# # # #   tags:
+# # # #   - reset
+# # # #   - master
+# # # #   roles:
+# # # #   - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
+# # # #   - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
+# # # #   - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
+# # # #   - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
+# # # #   - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes
