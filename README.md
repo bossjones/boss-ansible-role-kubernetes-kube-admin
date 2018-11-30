@@ -51,3 +51,13 @@ Author Information
 ------------------
 
 An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+
+
+
+# Bootstrap kubernetes master
+
+```
+# on master node run
+
+kubeadm init --apiserver-advertise-address=192.168.50.101  --ignore-preflight-errors="all" --dry-run
+```
