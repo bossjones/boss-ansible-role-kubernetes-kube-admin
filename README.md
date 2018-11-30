@@ -57,7 +57,11 @@ An optional section for the role authors to include contact information, or a we
 # Bootstrap kubernetes master
 
 ```
-# on master node run
+# on master node run(dry-run)
 
-kubeadm init --apiserver-advertise-address=192.168.50.101  --ignore-preflight-errors="all" --dry-run
+kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --dry-run
+
+# Actual run - master node run(dry-run)
+
+kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" >> cluster_initialized.txt
 ```

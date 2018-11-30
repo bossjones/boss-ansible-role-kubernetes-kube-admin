@@ -27,6 +27,8 @@ Last Usable IP Address = ......: 10.244.255.254
 
 ### our cidr (10.200.0.0/16) aka 10.200.0.1 - 10.200.255.254
 
+The Kubernetes cluster CIDR range is defined by the Controller Manager's --cluster-cidr flag. In this tutorial the cluster CIDR range will be set to 10.200.0.0/16, which supports 254 subnets
+
 ```
 # CIDR RANGE
 
