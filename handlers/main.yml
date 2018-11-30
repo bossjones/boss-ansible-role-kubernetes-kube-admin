@@ -32,3 +32,7 @@
   poll: 0
   ignore_errors: yes
   when: allow_restart | default ( false )
+
+
+- name: update timezone
+  command: dpkg-reconfigure --frontend noninteractive tzdata

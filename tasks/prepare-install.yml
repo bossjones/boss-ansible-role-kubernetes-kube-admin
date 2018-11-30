@@ -16,6 +16,7 @@
       - socat
       - util-linux
       - ntp
+      - ntpdate
 
 - name: add the kubernetes apt repo key
   apt_key:

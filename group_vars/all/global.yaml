@@ -108,11 +108,28 @@ turn_swapoff: True #False #True #false # default true # Note: by default kubelet
 ## it is mandatory to have the time from all machines in sync
 ntp_setup: True  # Default True
 ## ntp does not work via proxy, so, if ntp cannot reach external servers, define here the internal ntp server:
-#ntp_conf: |
+# ntp_conf: |
 #  server ntp1.corp.example.com
 #  server pool.ntp.org
 #  server pool.ntp.org
-#####
+# ####
+ntp_conf: |
+  driftfile /var/lib/ntp/ntp.drift
+  statistics loopstats peerstats clockstats
+  filegen loopstats file loopstats type day enable
+  filegen peerstats file peerstats type day enable
+  filegen clockstats file clockstats type day enable
+  pool 0.ubuntu.pool.ntp.org iburst
+  pool 1.ubuntu.pool.ntp.org iburst
+  pool 2.ubuntu.pool.ntp.org iburst
+  pool 3.ubuntu.pool.ntp.org iburst
+  pool ntp.ubuntu.com
+  restrict -4 default kod notrap nomodify nopeer noquery limited
+  restrict -6 default kod notrap nomodify nopeer noquery limited
+  restrict 127.0.0.1
+  restrict ::1
+  restrict source notrap nomodify noquery
+# ####
 
 #####
 ## hostname fix: set_hostname_to_inventory_hostname

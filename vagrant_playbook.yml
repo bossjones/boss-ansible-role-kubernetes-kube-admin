@@ -6,6 +6,10 @@
   gather_facts: no
   become: yes
   become_method: sudo
+  tags:
+    - sanity_check
+    - always
+    - servers
   pre_tasks:
   - name: Install python2 for Ansible (usually required on ubuntu, which defaults to python3) # Alternativelly, for Ubuntu machines, define var: ansible_python_interpreter=/usr/bin/python3
     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal) || (yum install -y python2 python-simplejson)
@@ -26,11 +30,11 @@
     - JoinConfiguration is not defined
     tags: always # always check if we have vars in place
 
-  - name: debug groups
-    debug: msg='{{groups | to_yaml}}'
+  # - name: debug groups
+  #   debug: msg='{{groups | to_yaml}}'
 
-  - name: debug hostvars
-    debug: msg='{{hostvars | to_yaml}}'
+  # - name: debug hostvars
+  #   debug: msg='{{hostvars | to_yaml}}'
 
 ##############################################################################
 # Install prereqs for perf/tools
@@ -92,26 +96,26 @@
         # REQUIRED: https://www.tecmint.com/hegemon-system-monitoring-tool-for-linux/
         - libsensors4-dev
 
-  - name: "SYSDIG: curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
-    shell: |
-      bash -lc "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
-    args:
-      executable: /bin/bash
+  # - name: "SYSDIG: curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
+  #   shell: |
+  #     bash -lc "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
+  #   args:
+  #     executable: /bin/bash
 
-  - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh"
-    shell: |
-      bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
-    args:
-      executable: /bin/bash
+  # - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh"
+  #   shell: |
+  #     bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
+  #   args:
+  #     executable: /bin/bash
 
-  - name: install ctop
-    shell: |
-      curl -L 'https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64' > /usr/local/bin/ctop
-      chmod +x /usr/local/bin/ctop
-    become: yes
-    become_method: sudo
-    args:
-      executable: /bin/bash
+  # - name: install ctop
+  #   shell: |
+  #     curl -L 'https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64' > /usr/local/bin/ctop
+  #     chmod +x /usr/local/bin/ctop
+  #   become: yes
+  #   become_method: sudo
+  #   args:
+  #     executable: /bin/bash
 
     # https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64
 
@@ -141,6 +145,7 @@
   tags:
     - bootstrap
     - servers
+    - common
   roles:
     - role: boss-ansible-role-bootstrap
     - role: boss-ansible-role-core
@@ -195,6 +200,7 @@
     # hosts_file: /etc/hosts.molecule
     boss__docker__version: "18.06"
     boss__docker__users: ["vagrant"]
+    boss__ntp__timezone: 'America/New_York'
   tags:
     - docker
     - docker-provision
@@ -202,6 +208,24 @@
     - install
     - master_install
     - ha
+  pre_tasks:
+    - name: "Check current timezone"
+      shell: cat /etc/timezone
+      register: current_timezone
+      changed_when: False
+
+    - name: "Set timezone"
+      timezone:
+        name: "{{ boss__ntp__timezone }}"
+
+    # - name: "Set {{boss__ntp__timezone}} timezone"
+    #   file: src=/usr/share/zoneinfo/{{ boss__ntp__timezone }}
+    #         dest=/etc/localtime
+    #         state=link
+    #         force=yes
+    #   when: current_timezone.stdout != '{{ boss__ntp__timezone }}'
+    #   become: yes
+
   roles:
     - role: geerlingguy.pip
       tags: [ 'primary-master', 'master', 'install', 'master_install']

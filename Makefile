@@ -170,6 +170,9 @@ run-ansible-docker:
 run-ansible-master:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags "master"
 
+run-ansible-timezone:
+	@ansible-playbook -i inventory.ini timezone.yml -v
+
 ping:
 	@ansible-playbook -v -i inventory.ini ping.yml
 
