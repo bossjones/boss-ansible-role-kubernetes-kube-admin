@@ -156,8 +156,7 @@ run-ansible-docker:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags docker-provision --flush-cache
 
 ping:
-# @ansible -i inventory.ini all -m ping -vvvvv
-	@ansible-playbook -vvvvv -i inventory.ini ping.yml
+	@ansible-playbook -v -i inventory.ini ping.yml
 
 # [ANSIBLE0013] Use shell only when shell functionality is required
 ansible-lint-role:
