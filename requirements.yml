@@ -8,3 +8,4 @@
 - src: https://github.com/bossjones/boss-ansible-role-debug
 - src: geerlingguy.pip
 - src: https://github.com/bossjones/boss-ansible-role-update-hosts
+- src: geerlingguy.docker

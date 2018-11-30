@@ -51,6 +51,12 @@ list:
 download-roles:
 	ansible-galaxy install -r requirements.yml --roles-path ./roles/
 
+download-roles-global:
+	ansible-galaxy install -r requirements.yml --roles-path=/etc/ansible/roles
+
+download-roles-global-force:
+	ansible-galaxy install --force -r requirements.yml --roles-path=/etc/ansible/roles
+
 raw:
 	$(call check_defined, product, Please set product)
 	$(call check_defined, command, Please set command)
@@ -133,6 +139,12 @@ install-deps-all:
 # 	pip install tox-travis
 # tox-install-all-notest:
 # 	tox -e py36 --notest
+
+provision:
+	@bash ./scripts/up.sh
+	vagrant sandbox commit
+	vagrant reload
+	ansible-playbook -i inventory.ini vagrant_playbook.yml -v
 
 up:
 	@bash ./scripts/up.sh
