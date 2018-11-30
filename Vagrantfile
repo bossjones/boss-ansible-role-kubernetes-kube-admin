@@ -30,6 +30,11 @@ Vagrant.configure(2) do |config|
       # vm_config.vm.synced_folder '.', '/vagrant', disabled: true
       # But not the centos box
       # vm_config.vm.synced_folder '.', '/home/vagrant/sync', disabled: true
+
+      # TODO: Should we try this???
+      # Change the permission of files and directories
+      # so that nosetests runs without extra arguments.
+      config.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=775,fmode=664"]
       vm_config.vm.synced_folder '.', '/shared', type: 'nfs'
 
       # assign an ip address in the hosts network
@@ -51,7 +56,7 @@ Vagrant.configure(2) do |config|
         v.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10_000]
 
         # FIXME: Temporary delete 11/30/2018
-        # v.customize ['modifyvm', :id, '--macaddress1', '5CA1AB1E00' + settings[:id].to_s]
+        v.customize ['modifyvm', :id, '--macaddress1', '5CA1AB1E00' + settings[:id].to_s]
 
         # SOURCE: https://www.virtualbox.org/manual/ch09.html#changenat
         # NOTE:  # do not use 10.x network for NAT ?
@@ -137,7 +142,7 @@ Vagrant.configure(2) do |config|
 
       # FIXME: Disable for the moment
       # vm_config.vm.provision :ansible do |ansible|
-      #   ansible.host_key_checking	= 'false'
+      #   ansible.host_key_checking = 'false'
       #   # Disable default limit to connect to all the machines
       #   ansible.limit = 'all'
       #   ansible.playbook = 'vagrant_playbook.yml'

@@ -26,7 +26,6 @@
     - JoinConfiguration is not defined
     tags: always # always check if we have vars in place
 
-
   - name: debug groups
     debug: msg='{{groups | to_yaml}}'
 
