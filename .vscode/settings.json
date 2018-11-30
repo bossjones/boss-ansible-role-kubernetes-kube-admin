@@ -1,3 +1,10 @@
 {
-  "files.exclude": {}
+  "files.exclude": {
+    ".vagrant/": "explorerExcludedFiles",
+    ".*~": "explorerExcludedFiles",
+    "*.retry": "explorerExcludedFiles",
+    "*~": "explorerExcludedFiles",
+    "ansible/roles/darkedges.commonos/": "explorerExcludedFiles",
+    "*.log": "explorerExcludedFiles"
+  }
 }

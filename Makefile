@@ -35,6 +35,7 @@ export PATH := ./venv/bin:$(PATH)
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+MAKE := make
 
 list_allowed_args := product ip command role tier
 
@@ -149,7 +150,7 @@ run-ansible:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v
 
 run-ansible-docker:
-	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags docker-provision
+	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags docker-provision --flush-cache
 
 ping:
 	@ansible -i inventory.ini all -m ping

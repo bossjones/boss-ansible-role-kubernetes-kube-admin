@@ -7,6 +7,7 @@ require 'yaml'
 config_yml = YAML.load_file(File.open(__dir__ + '/vagrant-config.yml'))
 
 NON_ROOT_USER = 'vagrant'.freeze
+MAX_NUM_VMS = 3
 
 Vagrant.configure(2) do |config|
   # set auto update to false if you do NOT want to check the correct additions version when booting this machine
@@ -41,13 +42,16 @@ Vagrant.configure(2) do |config|
         v.name = settings[:hostname]
 
         # Be nice to our users.
+
+        # v.customize ["modifyvm", :id, "--name", settings[:cpu]]
         v.customize ['modifyvm', :id, '--memory', settings[:ram], '--cpus', settings[:cpu]]
         v.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
         v.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
         # Prevent clock drift, see http://stackoverflow.com/a/19492466/323407
         v.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10_000]
 
-        v.customize ['modifyvm', :id, '--macaddress1', '5CA1AB1E00' + settings[:id].to_s]
+        # FIXME: Temporary delete 11/30/2018
+        # v.customize ['modifyvm', :id, '--macaddress1', '5CA1AB1E00' + settings[:id].to_s]
 
         # SOURCE: https://www.virtualbox.org/manual/ch09.html#changenat
         # NOTE:  # do not use 10.x network for NAT ?
@@ -61,7 +65,7 @@ Vagrant.configure(2) do |config|
         v.customize ['modifyvm', :id, '--ioapic', 'on']
         v.customize ['modifyvm', :id, '--paravirtprovider', 'kvm']
         v.customize ['modifyvm', :id, '--audio', 'none']
-      end
+      end  # end - config.vm.provider 'virtualbox' do |v|
 
       # If you want to create an array where each entry is a single word, you can use the %w{} syntax, which creates a word array:
       # However, notice that the %w{} method lets you skip the quotes and the commas.
@@ -78,7 +82,7 @@ Vagrant.configure(2) do |config|
         vm_config.hostmanager.ignore_private_ip = false
         vm_config.hostmanager.include_offline = true
         vm_config.hostmanager.aliases = aliases
-      end
+      end  # end - Vagrant.has_plugin?('vagrant-hostsupdater')
 
       if Vagrant.has_plugin?('vagrant-cachier')
         # If your Vagrantfile provisions multiple VMs, use the following line instead of auto_detect to prevent collisions:
@@ -89,7 +93,7 @@ Vagrant.configure(2) do |config|
           type: :nfs,
           mount_options: ['rw', 'vers=3', 'udp', 'nolock', 'noatime']
         }
-      end
+      end  # end - if Vagrant.has_plugin?('vagrant-cachier')
 
       vm_config.vm.provision 'shell', inline: 'ip address', run: 'always' # make user feel good
       vm_config.vm.provision 'file', source: 'hosts', destination: 'hosts'
@@ -129,7 +133,7 @@ Vagrant.configure(2) do |config|
           chown #{NON_ROOT_USER}:#{NON_ROOT_USER} /vagrant_bootstrap
           SHELL
         s.privileged = true
-      end
+      end  # end - vm_config.vm.provision 'shell' do |s|
 
       # FIXME: Disable for the moment
       # vm_config.vm.provision :ansible do |ansible|
