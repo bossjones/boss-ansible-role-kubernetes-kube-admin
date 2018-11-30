@@ -108,14 +108,14 @@
   #   args:
   #     executable: /bin/bash
 
-  # - name: install ctop
-  #   shell: |
-  #     curl -L 'https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64' > /usr/local/bin/ctop
-  #     chmod +x /usr/local/bin/ctop
-  #   become: yes
-  #   become_method: sudo
-  #   args:
-  #     executable: /bin/bash
+  - name: install ctop
+    shell: |
+      curl -L 'https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64' > /usr/local/bin/ctop
+      chmod +x /usr/local/bin/ctop
+    become: yes
+    become_method: sudo
+    args:
+      executable: /bin/bash
 
     # https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64
 
@@ -184,6 +184,33 @@
     args:
       warn: no
 
+##############################################################################
+# (servers) - Install and configure ntp
+##############################################################################
+- hosts: servers
+  name: (servers) - Install and configure ntp
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+  vars:
+    boss__ntp__timezone: 'America/New_York'
+  tags:
+    - docker
+    - docker-provision
+    - worker
+    - install
+    - worker_install
+    - ha
+    - ntp
+
+  roles:
+    - role: ../
+      tags: [ 'worker', 'install', 'worker_install', 'ntp']
+      task: prepare-ntpd
+      boss__ntp__timezone: 'America/New_York'
 
 ##############################################################################
 # Install k8 prepre steps on primary masters
@@ -208,25 +235,8 @@
     - install
     - master_install
     - ha
-  pre_tasks:
-    - name: "Check current timezone"
-      shell: cat /etc/timezone
-      register: current_timezone
-      changed_when: False
-
-    - name: "Set timezone"
-      timezone:
-        name: "{{ boss__ntp__timezone }}"
-
-    # - name: "Set {{boss__ntp__timezone}} timezone"
-    #   file: src=/usr/share/zoneinfo/{{ boss__ntp__timezone }}
-    #         dest=/etc/localtime
-    #         state=link
-    #         force=yes
-    #   when: current_timezone.stdout != '{{ boss__ntp__timezone }}'
-    #   become: yes
-
   roles:
+
     - role: geerlingguy.pip
       tags: [ 'primary-master', 'master', 'install', 'master_install']
 
@@ -236,16 +246,8 @@
       boss__docker__users: ["vagrant"]
       boss__docker__install_method: "pkg"
 
-    # - role: geerlingguy.docker
-    #   tags: [ 'primary-master', 'master', 'install', 'master_install']
-    #   version: "18.06"
-    #   users: ["vagrant"]
-    #   daemon_options:
-    #       - "--dns 8.8.8.8 --log-driver=json-file --log-opt=max-size=10m --log-opt=max-file=5 --debug -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
-    #   install_method: "shell"
-
     - role: ../
-      boss__kubernetes__kubeadm__install_method: "shell"
+      boss__kubernetes__kubeadm__install_method: "pkg"
       tags: [ 'primary-master', 'master', 'install', 'master_install']
       task: prepare
       boss__kubernetes__kubeadm__run_prepare: True

@@ -2,14 +2,63 @@
 ### ntpd:
 - block:
 
-  # # SOURCE: https://github.com/yktsubo/nsxt-k8s-setup/blob/8a34199f5769f5b6cdc44329fb7e3302b7dd64bf/playbooks/prep_os.yml
-  # - name: Set ntp server
-  #   shell: sed -i 's/#NTP=/NTP="{{ ntp }}"/g' /etc/systemd/timesyncd.conf
+  # # # SOURCE: https://github.com/yktsubo/nsxt-k8s-setup/blob/8a34199f5769f5b6cdc44329fb7e3302b7dd64bf/playbooks/prep_os.yml
+  # # - name: Set ntp server
+  # #   shell: sed -i 's/#NTP=/NTP="{{ ntp }}"/g' /etc/systemd/timesyncd.conf
 
-  # - name: Restart timesyncd
-  #   service: name=systemd-timesyncd state=restarted enabled=yes
+  # # FIXME: New 11/30/2018
 
-  # FIXME: New 11/30/2018
+  # - name: Run timedatectl status
+  #   command: /usr/bin/timedatectl status
+  #   changed_when: False
+  #   check_mode: no
+  #   register: timedatectl_result
+
+  # - name: Run timedatectl set-ntp no AKA turn off systemd-timesyncd
+  #   command: /usr/bin/timedatectl set-ntp no
+  #   changed_when: False
+  #   check_mode: no
+  #   register: timedatectl_result
+
+  # - name: Run timedatectl status
+  #   command: /usr/bin/timedatectl status
+  #   register: timedatectl_result
+  #   changed_when: 'timedatectl_result.stdout is search("Network time on: no")'
+
+  # # - name: Verify ntp
+  # #   command: /usr/bin/timedatectl set-ntp true
+  # #   when: "'Network time on: no' in timedatectl_result.stdout"
+  # #   become: yes
+
+  # - name: Keep systemd-timesyncd on - but without ntp support enabled
+  #   service: name=systemd-timesyncd state=started enabled=yes
+
+
+#########################
+#########################
+
+  - name: ntpd and ntpdate | it is mandatory to have the time from all machines in sync
+    package: state=present name={{ item }}
+    environment: '{{ proxy_env | default ({}) }}'
+    with_items:
+    - ntp
+    register: ntp_output
+#    notify: # Debian & RH diff service name...
+#    - Restart ntpd
+
+  # tasks file for adriagalin.timezone
+  - name: install tzdata if it is necessary
+    apt: name=tzdata state=present
+    tags: [ common, timezone ]
+
+  - name: "Check current timezone"
+    shell: cat /etc/timezone
+    register: current_timezone
+    changed_when: False
+
+  - name: "Set timezone"
+    timezone:
+      name: "{{ boss__ntp__timezone }}"
 
   - name: Run timedatectl status
     command: /usr/bin/timedatectl status
@@ -36,16 +85,32 @@
   - name: Keep systemd-timesyncd on - but without ntp support enabled
     service: name=systemd-timesyncd state=started enabled=yes
 
-#########################
+  - name: Ensure ntp service is running
+    service:
+      name: ntp
+      state: started
+      enabled: yes
+    when: ansible_os_family == "Debian"
 
-  - name: ntpd and ntpdate | it is mandatory to have the time from all machines in sync
-    package: state=present name={{ item }}
-    environment: '{{ proxy_env | default ({}) }}'
-    with_items:
-    - ntp
-    register: ntp_output
-#    notify: # Debian & RH diff service name...
-#    - Restart ntpd
+  - name: Query ntpq about its status
+    shell: ntpq -p
+    register: ntpq
+
+  - name: ntpq -p result
+    debug:
+      msg: "{{ ntpq.stdout }}"
+
+  - name: Getting the current machine date/time
+    shell: date
+    register: date
+
+  - name: Print current datetime
+    debug:
+      msg: "{{ inventory_hostname }}: {{ date.stdout }}"
+
+#########################
+#########################
+#########################
 
   - name: ntpd configuration
     copy: content={{ntp_conf}} dest=/etc/ntp.conf backup=yes
