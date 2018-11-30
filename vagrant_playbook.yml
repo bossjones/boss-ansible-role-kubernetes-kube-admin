@@ -32,13 +32,19 @@
   - name: debug hostvars
     debug: msg='{{hostvars | to_yaml}}'
 
+##############################################################################
+# Install prereqs for perf/tools
+##############################################################################
 # # no_log: true
 - hosts: servers
   gather_facts: True
   become: yes
   become_method: sudo
   tags:
-    - bootstrap
+    - prereqs
+    - perf
+    - perf_tools
+    - tools
     - servers
   pre_tasks:
   - name: "Install prereq tools"
@@ -84,17 +90,29 @@
     args:
       executable: /bin/bash
 
-  # roles:
-  #   - role: boss-ansible-role-bootstrap
-  #   - role: boss-ansible-role-core
-  #   - role: boss-ansible-role-fact
-  #   - role: boss-ansible-role-environment
-  #   - role: boss-ansible-role-etckeeper
-#     - role: boss-ansible-role-debug
-#     - role: boss-ansible-role-update-hosts
-#       boss__update__hosts__hosts_file: /etc/hosts
-#       boss__update__hosts__ansible_group: "servers"
-#       boss__update__hosts__networking_interface: "enp0s8"
+  tasks:
+
+  - name: cat /etc/hosts
+    command: cat /etc/hosts
+    args:
+      warn: no
+
+##############################################################################
+# bootstrap common roles
+##############################################################################
+- hosts: servers
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  tags:
+    - bootstrap
+    - servers
+  roles:
+    - role: boss-ansible-role-bootstrap
+    - role: boss-ansible-role-core
+    - role: boss-ansible-role-fact
+    - role: boss-ansible-role-environment
+    - role: boss-ansible-role-etckeeper
 
   tasks:
 
@@ -102,6 +120,31 @@
     command: cat /etc/hosts
     args:
       warn: no
+
+##############################################################################
+# bootstrap debug role and update hosts
+##############################################################################
+- hosts: servers
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  tags:
+    - bootstrap
+    - servers
+  roles:
+    - role: boss-ansible-role-debug
+    - role: boss-ansible-role-update-hosts
+      boss__update__hosts__hosts_file: /etc/hosts
+      boss__update__hosts__ansible_group: "servers"
+      boss__update__hosts__networking_interface: "enp0s8"
+
+  tasks:
+
+  - name: cat /etc/hosts
+    command: cat /etc/hosts
+    args:
+      warn: no
+
 
 # # # no_log: true
 # - hosts: servers
