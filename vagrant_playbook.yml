@@ -169,6 +169,46 @@
       warn: no
 
 
+##############################################################################
+# Install k8 prepre steps on primary masters
+##############################################################################
+- hosts: primary-master
+  name: (primary-master) - Install k8 prepre steps on primary masters
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  tags:
+    - docker
+    - docker-provision
+    - master
+    - install
+    - master_install
+    - ha
+  roles:
+    - role: geerlingguy.pip
+      tags: [ 'primary-master', 'master', 'install', 'master_install']
+
+    - role: boss-ansible-role-docker
+      tags: [ 'primary-master', 'master', 'install', 'master_install']
+      boss__docker__version: "18.06"
+      boss__docker__users: ["vagrant"]
+      boss__docker__daemon_options:
+        - "--dns 8.8.8.8 --log-driver=json-file --log-opt=max-size=10m --log-opt=max-file=5 --debug -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
+      boss__docker__install_method: "shell"
+
+    - role: ../
+      boss__kubernetes__kubeadm__install_method: "shell"
+      tags: [ 'primary-master', 'master', 'install', 'master_install']
+      task: prepare
+      boss__kubernetes__kubeadm__run_prepare: True
+
+    # - role: boss-ansible-role-docker
+    #   # boss__docker__version: "18.06"
+    #   boss__docker__users: ["vagrant"]
+    #   boss__docker__daemon_options:
+    #     - "--dns 8.8.8.8 -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
+    #   boss__docker__install_method: "shell"
+
 # # # no_log: true
 # - hosts: servers
 #   gather_facts: True

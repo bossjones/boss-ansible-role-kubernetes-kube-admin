@@ -26,11 +26,22 @@
 
 - name: add the kubernetes apt repo
   apt_repository:
-    repo: "deb http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} main"
+    repo: "deb [arch={{sys_arch}}] http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} main"
     update_cache: True
     state: present
+    filename: kubernetes
   environment: '{{ proxy_env | default ({}) }}'
   when: ansible_os_family == "Debian"
+
+# TODO: Do the same for docker?
+# - name: add the kubernetes apt repo
+#   apt_repository:
+#     repo: "deb [arch={{sys_arch}}] http://apt.kubernetes.io/ kubernetes-{{ansible_distribution_release}} edge"
+#     update_cache: True
+#     state: present
+#     filename: kubernetes
+#   environment: '{{ proxy_env | default ({}) }}'
+#   when: ansible_os_family == "Debian"
 
 - name: apt-get clean metadata
   command: apt-get clean ; apt-file purge
@@ -65,14 +76,14 @@
   when: kubelet_version is not defined
 
 - name: Install kubelet
-  package: name="{{ item }}={{kubelet_version | regex_replace('v')}}*" state=installed
+  package: name="{{ item }}={{kubelet_version | regex_replace('v')}}*" state=present
   #environment: '{{ proxy_env | default ({}) }}'
   with_items:
   - kubelet
   when: kubelet_version is defined and ( kubelet_version!='installed' or kubelet_version!='latest' ) and ansible_os_family == "Debian"
 
 - name: Install kubelet
-  package: name="{{ item }}-{{kubelet_version | regex_replace('v')}}" state=installed
+  package: name="{{ item }}-{{kubelet_version | regex_replace('v')}}" state=present
   #environment: '{{ proxy_env | default ({}) }}'
   with_items:
   - kubelet
@@ -95,14 +106,14 @@
   when: kubectl_version is not defined
 
 - name: Install kubectl # ansible bug 29705
-  package: name="{{ item }}={{kubectl_version | regex_replace('v')}}*" state=installed
+  package: name="{{ item }}={{kubectl_version | regex_replace('v')}}*" state=present
   #environment: '{{ proxy_env | default ({}) }}'
   with_items:
   - kubectl
   when: kubectl_version is defined and ( kubectl_version!='installed' or kubectl_version!='latest' ) and ansible_os_family == "Debian"
 
 - name: Install kubectl
-  package: name="{{ item }}-{{kubectl_version | regex_replace('v')}}" state=installed
+  package: name="{{ item }}-{{kubectl_version | regex_replace('v')}}" state=present
   #environment: '{{ proxy_env | default ({}) }}'
   with_items:
   - kubectl
@@ -125,14 +136,14 @@
   when: kubeadm_version is not defined
 
 - name: Install kubeadm # ansible bug 29705
-  package: name="{{ item }}={{kubeadm_version | regex_replace('v')}}*" state=installed
+  package: name="{{ item }}={{kubeadm_version | regex_replace('v')}}*" state=present
   #environment: '{{ proxy_env | default ({}) }}'
   with_items:
   - kubeadm
   when: kubeadm_version is defined and ( kubeadm_version!='installed' or kubeadm_version!='latest' ) and ansible_os_family == "Debian"
 
 - name: Install kubeadm
-  package: name={{ item }}-{{kubeadm_version | regex_replace('v')}} state=installed
+  package: name={{ item }}-{{kubeadm_version | regex_replace('v')}} state=present
   #environment: '{{ proxy_env | default ({}) }}'
   with_items:
   - kubeadm

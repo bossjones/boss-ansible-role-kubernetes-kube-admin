@@ -155,6 +155,9 @@ run-ansible:
 run-ansible-docker:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags docker-provision --flush-cache
 
+run-ansible-master:
+	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags "master"
+
 ping:
 	@ansible-playbook -v -i inventory.ini ping.yml
 
