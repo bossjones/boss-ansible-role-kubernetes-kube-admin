@@ -157,11 +157,44 @@ kubeadm init --kubernetes-version=$_KUBE_VERSION --apiserver-advertise-address=1
 # Credentials after kubeadm init
 
 ```
+# VAGRANT USER
 sudo --user=vagrant mkdir -p /home/vagrant/.kube
 cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
 chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
+
+
+
+# ROOT
+sudo --user=root mkdir -p /root/.kube
+cp -i /etc/kubernetes/admin.conf /root/.kube/config
+chown $(id -u root):$(id -g root) /root/.kube/config
 ```
 
+
+# Verify connectivity
+
+# SOURCE: https://wiki.onap.org/display/DW/Deploying+Kubernetes+Cluster+with+kubeadm
+
+```
+# If you installed coredns addon
+kubectl get pods --all-namespaces -o wide
+
+#  If you did not install coredns addon; kube-dns pod will be created
+kubectl get pods --all-namespaces -o wide
+
+
+# (Optional) run the following commands if you are curious.
+kubectl get node
+kubectl get secret
+kubectl config view
+kubectl config current-context
+kubectl get componentstatus
+kubectl get clusterrolebinding --all-namespaces
+kubectl get serviceaccounts --all-namespaces
+kubectl get pods --all-namespaces -o wide
+kubectl get services --all-namespaces -o wide
+kubectl cluster-info
+```
 
 # install pod network ( vanilla )
 
@@ -173,7 +206,14 @@ kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version
 
 # example from gitissue
 
-kubectl apply -f 'https://cloud.weave.works/k8s/net?k8s-version=v1.11.5&env.IPALLOC_RANGE=10.32.0.0/12'
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=v1.11.5&env.IPALLOC_RANGE=10.32.0.0/12"
+
+
+looks like this guy above is overlapping...
+
+root@master:~# docker logs 63e5437d8780
+Network 10.32.0.0/12 overlaps with existing route 10.32.2.0/24 on host
+root@master:~#
 ```
 
 # Allow pods to run on the master node

@@ -4,7 +4,7 @@
     :hostname: "master"
     # :ip: "10.0.0.10"
     :ip: "192.168.50.101"
-    :ram: 1024
+    :ram: 2048
     :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 10
@@ -13,7 +13,7 @@
     :hostname: "worker1"
     # :ip: "10.0.0.11"
     :ip: "192.168.50.102"
-    :ram: 1024
+    :ram: 2048
     :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 11
@@ -22,7 +22,7 @@
     :hostname: "worker2"
     # :ip: "10.0.0.12"
     :ip: "192.168.50.103"
-    :ram: 1024
+    :ram: 2048
     :cpu: 2
     :box: "ubuntu/xenial64"
     :id: 12
