@@ -169,6 +169,11 @@ chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
 # SOURCE: https://medium.com/@lizrice/kubernetes-in-vagrant-with-kubeadm-21979ded6c63
 
 kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+
+
+# example from gitissue
+
+kubectl apply -f 'https://cloud.weave.works/k8s/net?k8s-version=v1.11.5&env.IPALLOC_RANGE=10.32.0.0/12'
 ```
 
 # Allow pods to run on the master node
