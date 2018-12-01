@@ -26,3 +26,10 @@
   - ip_vs_wrr
   - ip_vs_sh
   - nf_conntrack_ipv4
+
+
+- name: net.bridge.bridge-nf-call-ip6tables=1
+  sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 state=present reload=yes sysctl_set=yes
+
+- name: net.bridge.bridge-nf-call-iptables=1
+  sysctl: name=net.bridge.bridge-nf-call-iptables value=1 state=present reload=yes sysctl_set=yes
