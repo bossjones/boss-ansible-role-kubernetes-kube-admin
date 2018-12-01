@@ -14,3 +14,20 @@
   when: boss__kubernetes__kubeadm__k8s_addons_urls is defined
   tags:
   - k8s_addons
+
+
+
+## NOTE: We should enable dashboard !!!!!!!!!
+# # SOURCE: https://github.com/geerlingguy/ansible-role-kubernetes/blob/master/tasks/master-setup.yml
+# - name: Check if Kubernetes Dashboard UI service already exists.
+#   shell: kubectl get services --namespace kube-system | grep -q kubernetes-dashboard
+#   changed_when: false
+#   failed_when: false
+#   register: kubernetes_dashboard_service
+#   when: kubernetes_enable_web_ui
+
+# - name: Enable the Kubernetes Web Dashboard UI (if configured).
+#   command: "kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml"
+#   when:
+#     - kubernetes_enable_web_ui
+#     - kubernetes_dashboard_service is failed
