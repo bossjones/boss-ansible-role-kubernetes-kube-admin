@@ -1,0 +1,29 @@
+---
+
+# proper rest of MASTER ONLY!!!!!!!!!!
+- include: reset-facts.yml
+- include: reset-helm.yml
+# TODO: Rename this to reset
+- include: remove_pvs.yml
+- include: reset-nfs.yml
+- include: reset-rook.yml
+- include: reset-drain.yml
+
+- include: prepare-configure.yml
+- include: prepare-docker.yml
+- include: prepare-iptables.yml
+# NOTE: DISABLED FOR THE MOMENT [11/30/2018]
+- include: prepare-kube_config.yml
+- include: prepare-swap.yml
+- include: prepare-ntpd.yml
+  when: ntp_setup | default (True)
+- include: prepare-various.yml
+- include: prepare-completion.yml
+
+
+
+#   - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
+#   - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
+#   - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
+#   - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
+#   - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes

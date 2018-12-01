@@ -1,0 +1,12 @@
+# Determine if the following exist, then set facts for them
+
+# etcd
+# kubelet
+# kubeadm
+# helm
+# rook(ceph) ... storage
+# nfs ... storage
+
+# weave
+# drain nodes
+

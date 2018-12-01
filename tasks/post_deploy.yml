@@ -1,0 +1,135 @@
+---
+
+# Call this after the master is configured!
+
+# Run everything like this, and just include files
+# ---
+# - include: network.yml
+# - include: post_cluster_deploy.yml
+# - include: sanity.yml
+# - include: taints.yml
+
+
+#########################################################
+# network.yml
+#########################################################
+# ---
+# # - hosts: master
+# #   become: yes
+# #   become_method: sudo
+# #   tasks:
+#   - set_fact:
+#       env_kc: '{{ proxy_env |default({}) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+#     tags:
+#     - always
+
+#   # Not clear if mandatory for weave:
+#   # https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
+#   - name: Copy weave net script
+#     environment: '{{ proxy_env | default ({}) }}'
+#     get_url: url=https://raw.githubusercontent.com/weaveworks/weave/master/weave dest=/usr/local/bin/weave mode=u+rxw force=yes
+#     ignore_errors: yes  # Currently there is no way to check if the user is using weave
+#     tags:
+#     - weave
+#     - network
+
+#   - name: Create cluster network
+#     command: /usr/bin/kubectl apply -f {{ item }}
+#     #with_items: "{{ k8s_network_addons_urls | default ([]) }}"
+#     with_items: '{{ k8s_network_addons_urls | default ("https://docs.projectcalico.org/v2.6/getting-started/kubernetes/installation/hosted/kubeadm/1.6/calico.yaml") }}'
+#     environment: '{{env_kc}}'
+#     #when: k8s_network_addons_urls is defined
+#     tags:
+#     - k8s_network_addons
+#     - network
+
+#   - name: sanity - wait for alls pod to be running (besides kube-dns for now, as it might be forced to a node if master did not allow it due to tains)
+#     environment:
+#       KUBECONFIG: /etc/kubernetes/admin.conf
+#     shell: "kubectl get --namespace kube-system pods --no-headers | grep -v -w 'Running' | grep -v 'kube-dns' || true "
+#     register: command_result
+#     tags:
+#     - k8s_network_addons
+#     - sanity
+#     - network
+#     until: command_result.stdout == ""
+#     retries: 40
+#     delay: 3
+#     changed_when: false
+
+
+
+
+#########################################################
+# post_cluster_deploy.yml
+#########################################################
+# ---
+# # - hosts: master
+# #   become: yes
+# #   become_method: sudo
+# #   tags:
+# #   - k8s_addons
+# #   tasks:
+#   - set_fact:
+#       env_kc: '{{ proxy_env |default({}) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+#     tags:
+#     - always
+
+#   - name: Install k8s_addons_urls (with proxy)
+#     command: /usr/bin/kubectl apply -f {{ item }}
+#     with_items: "{{ k8s_addons_urls | default ('') }}"
+#     environment: '{{env_kc}}'
+#     when: k8s_addons_urls is defined
+#     tags:
+#     - k8s_addons
+
+
+#########################################################
+# sanity.yml
+#########################################################
+
+# ---
+#   - name: Wait few seconds for network to start deploying
+#     pause: seconds=3
+#     changed_when: false
+
+#   - name: sanity - wait for alls pod to be running (besides kube-dns for now, as it might be forced to a node if master did not allow it due to tains)
+#     environment:
+#       KUBECONFIG: /etc/kubernetes/admin.conf
+#     shell: "kubectl get --namespace kube-system pods --no-headers | grep -v -w 'Running' | grep -v 'kube-dns' || true "
+#     register: command_result
+#     tags:
+#     - k8s_network_addons
+#     - sanity
+#     until: command_result.stdout == ""
+#     retries: 40
+#     delay: 3
+#     changed_when: false
+
+#########################################################
+# taints.yml
+#########################################################
+
+# ---
+#   - name: apply taints_master
+#     environment:
+#       KUBECONFIG: /etc/kubernetes/admin.conf
+#     shell: 'kubectl taint nodes {{ inventory_hostname_short }} {{ item }} --overwrite'
+#     when: taints_master is defined
+#     with_items: '{{ taints_master }}'
+#     tags:
+#     - taints
+
+#   - name: apply master_uncordon
+#     environment:
+#       KUBECONFIG: /etc/kubernetes/admin.conf
+#     shell: 'kubectl uncordon {{ inventory_hostname_short }} '
+#     when: master_uncordon is defined
+#     tags:
+#     - taints
+
+#   - name: 'Wait few seconds for taints/uncordon on master take effect'
+#     pause: seconds=3
+#     when: taints_master is defined or master_uncordon is defined
+#     tags:
+#     - taints

@@ -1,0 +1,16 @@
+---
+
+# proper rest of MASTER ONLY!!!!!!!!!!
+- include: reset-facts.yml
+- include: reset-helm.yml
+# TODO: Rename this to reset
+- include: remove_pvs.yml
+- include: reset-nfs.yml
+- include: reset-rook.yml
+- include: reset-drain.yml
+
+#   - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
+#   - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
+#   - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
+#   - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
+#   - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes

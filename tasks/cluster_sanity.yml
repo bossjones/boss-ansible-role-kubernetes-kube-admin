@@ -1,0 +1,58 @@
+---
+# SOURCE: kubeadm-playbook
+
+# - block:
+# ## Decide how to approach the master: inventory or force fqdn (for non MasterHA cases); via VIP,MasterHA (for MasterHA cases)
+#   - name: decide_master_name
+#     include_role:
+#       name: common
+#       tasks_from: decide_master_name
+
+
+#   - name: "Wait 300 seconds for master at {{ master_name }}:{{ InitConfiguration.apiEndpoint.bindPort | default (6443) }} to become open (MasterHA)"
+#     wait_for:
+#       port: "{{ InitConfiguration.apiEndpoint.bindPort | default (6443) }}"
+#       host: "{{ master_name }}"
+#       delay: 1
+#       timeout: 300
+# ### END CODE DUPLICATION
+
+#   - name: kubectl get nodes
+#     shell: "kubectl get nodes --no-headers | grep -v -w 'Ready' || true "
+#     register: command_result
+#     tags:
+#     - node_sanity
+#     until: command_result.stdout == ""
+#     retries: 40
+#     delay: 3
+#     changed_when: false
+
+#   - name: kubectl get nodes
+#     shell: "kubectl get --namespace kube-system pods --no-headers | grep -v -w 'Running' || true "
+#     register: command_result
+#     tags:
+#     - pod_sanity
+#     until: command_result.stdout == ""
+#     retries: 30
+#     delay: 3
+#     changed_when: false
+
+# # >= and not == because we may use this role to only to add nodes also.
+#   - name: Check all nodes were registered
+#     shell: "/usr/bin/test $(kubectl get nodes | grep -ow Ready | wc -l) -ge {{ groups['all'] | length }}"
+#     register: command_result
+#     retries: 30
+#     delay: 3
+#     until: command_result is success
+#     changed_when: false
+#     tags:
+#     - cluster_info
+#     - cluster_status
+#     - node_sanity
+
+#   environment:
+#     KUBECONFIG: /etc/kubernetes/admin.conf
+#   tags:
+#   - sanity
+#   - cluster_sanity
+

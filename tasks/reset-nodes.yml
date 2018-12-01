@@ -1,0 +1,112 @@
+---
+
+# proper rest of Node ONLY!!!!!!!!!!
+- include: reset-facts.yml
+
+- include: reset-weave.yml
+- include: reset-nfs.yml # make sure you look at tools/tasks/reset.yml for proper advice on doing this
+- include: reset-kubeadm.yml
+  ignore_errors: yes
+
+# TODO: Add this logic to reset-kubeadm.yml
+# FIXME: 12/1/2018
+#   ### Cleaning full /etc/kubernetes/ ; Starting k8s 1.12 behaves better, at some point we will remove this step:
+#   - name: ensure old kubeadm config files were removed
+#     file: state=absent path={{ item }}
+#     with_items:
+#     - /etc/kubernetes/
+#     #- /etc/kubernetes/kubeadm.conf
+#     #- /etc/kubernetes/kubeadm-master.config
+#     #- /etc/kubernetes/kubeadm-master.conf
+#     #- /etc/kubernetes/cloud-config
+
+- include: reset-etcd.yml
+
+# TODO: Add this logic to reset-etcd.yml
+# FIXME: 12/1/2018
+# - name: ensure old /var/lib/etcd/member is removed
+# file: state=absent path={{ item }}
+# with_items:
+# - /var/lib/etcd/member
+# when: etcd_clean | default(true)
+
+
+- include: reset-kube.yml
+
+# TODO: Add this logic to reset-kube.yml
+# FIXME: 12/1/2018
+# - name: systemctl stop kube*.*.slice
+# shell: 'for i in $(systemctl list-unit-files --no-legend --no-pager -l | grep --color=never -o kube.*\.slice );do echo $i; systemctl stop $i ; done'
+# tags:
+# - umount
+
+
+
+- include: reset-pkgs.yml
+# TODO: Add this logic to reset-pkgs.yml
+# FIXME: 12/1/2018
+#   - name: Remove before reinstall packages
+#     package: name={{ item }} state=absent
+#     with_items:
+#     - kubelet
+#     - kubeadm
+#     - kubectl
+#     - kubernetes-cni
+#     when: full_kube_reinstall | default (False) #is defined and full_kube_reinstall
+#     tags:
+#     - kubelet
+#     - uninstall
+
+#   - name: stop kubelet for cleanup activities
+#     systemd: name={{ item }} state=stopped
+#     with_items:
+#     - kubelet
+#     - keepalived
+#     - etcd
+#     tags:
+#     - kubelet
+#     - uninstall
+#     ignore_errors: yes
+
+
+
+- include: remove-plugins-mounts.yml
+# TODO: Add this logic to remove-plugins-mounts.yml
+# FIXME: 12/1/2018
+#   - name: remove plugins mount leftovers; Note you have to collect them from the remote storage (e.g. vsphere datastore) also
+#     #shell: 'umount $(mount | grep " on /var/lib/kubelet/plugins/kubernetes.io/" | cut -f1 -d" ")'
+#     shell: umount -f $(mount | grep '/kubelet/plugins/kubernetes.io/' | awk '{print $3}')
+#     #shell: 'umount $(mount | grep "/kubelet/plugins/kubernetes.io/" | cut -f1 -d" ")'
+#     tags:
+#     - kubelet
+#     - uninstall
+#     ignore_errors: yes
+
+#   - name: remove pods mount leftovers; Note you have to collect them from the remote storage (e.g. vsphere datastore) also
+#     shell: umount -f $(mount | grep '/kubelet/pods/' | grep '/volumes/kubernetes.io~' | awk '{print $3}')
+#     tags:
+#     - kubelet
+#     - uninstall
+#     ignore_errors: yes
+
+
+
+- include: reset-iptables.yml
+# - name: Reset iptables rules # THIS TASK SHOULD BE REMOVED, is not maintained
+#     shell: iptables-save | awk '/^[*]/ { print $1 } /^:[A-Z]+ [^-]/ { print $1 " ACCEPT" ; } /COMMIT/ { print $0; }' | iptables-restore
+#     when: iptables_reset is defined and iptables_reset
+#     ignore_errors: yes
+#     tags:
+#     - uninstall
+
+
+
+# - hosts: nodes
+#   become: yes
+#   become_method: sudo
+#   tags:
+#   - node
+#   roles:
+#   - { role: tools, task: reset, tags: [ 'reset', 'node_reset' ], when: "inventory_hostname not in groups['masters']" }
+#   - { role: tools, task: weave_reset, tags: [ 'reset', 'node_reset', 'network_reset', 'weave_reset', 'weave' ], when: "inventory_hostname not in groups['masters']" }
+#   - { role: common, task: all, tags: [ 'common', 'install', 'common_install', 'node_install', 'node' ], when: "inventory_hostname not in groups['masters']" }
