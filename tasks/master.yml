@@ -76,7 +76,7 @@
 
 - name: create directory ~/.kube for root/ssh user
   # file: path='$HOME/.kube' state=directory owner=vagrant
-  file: path='$HOME/.kube' state=directory
+  file: path='$HOME/.kube' state=directory mode=0755 recurse=True
   become: '{{ item }}'
   with_items:
     - true  # Run as root
