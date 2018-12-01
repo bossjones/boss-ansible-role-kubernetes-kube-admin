@@ -75,6 +75,21 @@ NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github
 # SOURCE: https://medium.com/@lizrice/kubernetes-in-vagrant-with-kubeadm-21979ded6c63
 
 sed -i '0,/ExecStart=/s//Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=cgroupfs"\n&/' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+
+
+# TODO: add this to ansible
+.... how do we dynamically get this value?
+
+export _DOCKER_CGROUP_DRIVER=$(docker info | grep cgroup | cut -d: -f2 | awk '{print $1}')
+
+echo $_DOCKER_CGROUP_DRIVER
+
+then append it to:
+
+root@master:~# cat /etc/default/kubelet
+KUBELET_EXTRA_ARGS=
+
 ```
 
 Before:
@@ -124,10 +139,36 @@ root@master:~#
 
 # on master node run(dry-run)
 # With "CoreDNS" addon (recommended)
-kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --dry-run
+export NODENAME=$(hostname -s)
+kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --node-name $NODENAME --dry-run
 
 
 # Actual run - master node run
 # With "CoreDNS" addon (recommended)
-kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true >> cluster_initialized.txt
+export NODENAME=$(hostname -s)
+kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --node-name $NODENAME >> cluster_initialized.txt
+```
+
+
+# Credentials after kubeadm init
+
+```
+sudo --user=vagrant mkdir -p /home/vagrant/.kube
+cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
+```
+
+
+# install pod network ( vanilla )
+
+```
+# SOURCE: https://medium.com/@lizrice/kubernetes-in-vagrant-with-kubeadm-21979ded6c63
+
+kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+```
+
+# Allow pods to run on the master node
+
+```
+kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
