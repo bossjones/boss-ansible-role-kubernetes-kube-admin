@@ -3,6 +3,8 @@
 ######################################################################################
 # nfs - common
 ######################################################################################
+
+# FIXME: Come back to this, libnfsidmap2 is used on xenial ... libnfsidmap is debian
 - name: Install NFS packages
   package:
     name: "{{ item }}"
@@ -24,7 +26,7 @@
 # nfs - server
 ######################################################################################
 
-- debug: msg="Server"
+- debug: msg="NFS Server"
 
 - name: enable services
   service:
@@ -49,7 +51,7 @@
     regexp: "^{{ item.path }} "
     line: "{{ item.path }} {{ item.export }}"
     create: yes
-  with_items: "{{ nfs_exports }}"
+  with_items: "{{ boss__kubernetes__kubeadm__nfs_exports }}"
   register: nfs_exports_result
 
 - name: Restart NFS server service
@@ -58,21 +60,21 @@
     state: restarted
   when: nfs_exports_result|changed
 
-- name: enable firewalld for NFS Server
-  firewalld:
-    service: "{{ item }}"
-    zone: public
-    permanent: true
-    state: enabled
-  with_items:
-    - mountd
-    - rpc-bind
-    - nfs
+# - name: enable firewalld for NFS Server
+#   firewalld:
+#     service: "{{ item }}"
+#     zone: public
+#     permanent: true
+#     state: enabled
+#   with_items:
+#     - mountd
+#     - rpc-bind
+#     - nfs
 
 ######################################################################################
 # nfs - client
 ######################################################################################
-- debug: msg="Client"
+- debug: msg="NFS Client"
 
 - name: enable services
   service:
@@ -85,7 +87,7 @@
 - name: mount the NFS directories
   mount:
     name: "{{ item.path }}"
-    src: "{{ hostvars[groups[nfs_server_group][0]]['ansible_' + nfs_interface].ipv4.address }}:{{ item.remote }}"
+    src: "{{ hostvars[groups[boss__kubernetes__kubeadm__nfs_server_group][0]]['ansible_' + boss__kubernetes__kubeadm__nfs_interface].ipv4.address }}:{{ item.remote }}"
     state: mounted
     fstype: nfs
-  with_items: "{{ nfs_exports }}"
+  with_items: "{{ boss__kubernetes__kubeadm__nfs_exports }}"

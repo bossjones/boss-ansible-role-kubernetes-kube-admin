@@ -84,12 +84,12 @@ boss__kubernetes__kubeadm__apt_cache_time: 86400
 
 
 # NOTE: Taken from vagrant-ansible-kubernetes
-kubernetes_interface: "{{ ansible_default_ipv4.interface }}"
-install_nfs: true
+boss__kubernetes__kubeadm__install_nfs: true
 
-boss__kubernetes__kubeadm__kubernetes_interface: "eth1"
-boss__kubernetes__kubeadm__nfs_interface: "{{ kubernetes_interface }}"
+boss__kubernetes__kubeadm__kubernetes_interface: eth0  # enp0s8 (if vagrant)
+boss__kubernetes__kubeadm__nfs_interface: "{{ boss__kubernetes__kubeadm__kubernetes_interface }}"
 
+# SOURCE: darkedges.nfs
 boss__kubernetes__kubeadm__nfs_server_group: kubernetes-master
 boss__kubernetes__kubeadm__nfs_client_group: kubernetes-nodes
 
@@ -97,11 +97,3 @@ boss__kubernetes__kubeadm__nfs_exports:
   - path: "/nfsfileshare"
     remote: "/nfsfileshare"
     export: "*(fsid=0,rw,async,no_root_squash,no_subtree_check,insecure)"
-
-
-
-# SOURCE: darkedges.nfs
-nfs_server_group: server
-nfs_client_group: client
-nfs_exports:
-nfs_interface: eth0  # enp0s8 (if vagrant)
