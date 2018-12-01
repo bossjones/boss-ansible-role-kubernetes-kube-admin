@@ -377,23 +377,23 @@
       failed_when: false
       check_mode: no
       with_items:
-        - device-discovery-cli
-        - diff-so-fancy
+        # - device-discovery-cli
+        # - diff-so-fancy
         - docker-enter
         - docker-loghose
-        - figlet-cli
-        - get-port-cli
-        - getmac
-        - gtop
-        - jsonlint
-        - pathogen-pm
-        - speed-test
-        - spoof
-        - tldr
-        - vtop
-        - whereami
-        - wireless-tools
-        - yaml-lint
+        # - figlet-cli
+        # - get-port-cli
+        # - getmac
+        # - gtop
+        # - jsonlint
+        # - pathogen-pm
+        # - speed-test
+        # - spoof
+        # - tldr
+        # - vtop
+        # - whereami
+        # - wireless-tools
+        # - yaml-lint
       become: yes
       become_user: "{{bossjones__user}}"
 
