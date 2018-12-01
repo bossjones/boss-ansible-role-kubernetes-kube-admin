@@ -34,7 +34,6 @@
 - name: net.bridge.bridge-nf-call-iptables=1
   sysctl: name=net.bridge.bridge-nf-call-iptables value=1 state=present reload=yes sysctl_set=yes
 
-
 - name: load bridge kernel module ( for /proc/sys/net/bridge/bridge-nf-call-iptables )
   modprobe: name={{item}} state=present
   with_items:
