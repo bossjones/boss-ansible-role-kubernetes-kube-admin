@@ -255,146 +255,141 @@
       boss__kubernetes__kubeadm__override_node_ip: True
 
 
+##############################################################################
+# Install k8 prepre steps on kubernetes-nodes
+##############################################################################
+- hosts: kubernetes-nodes
+  name: (kubernetes-nodes) - Install k8 prepre steps on kubernetes-nodes
+  gather_facts: True
+  become: yes
+  become_method: sudo
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+  vars:
+    # hosts_file: /etc/hosts.molecule
+    boss__docker__version: "18.06"
+    boss__docker__users: ["vagrant"]
+    boss__ntp__timezone: 'America/New_York'
+  tags:
+    - docker
+    - docker-provision
+    - workers
+    - install
+    - worker_install
+    - ha
+    - nodes
+  roles:
+
+    - role: geerlingguy.pip
+      tags: [ 'worker', 'install', 'worker_install']
+
+    - role: boss-ansible-role-docker
+      tags: [ 'worker', 'install', 'worker_install']
+      boss__docker__version: "18.06"
+      boss__docker__users: ["vagrant"]
+      boss__docker__install_method: "pkg"
+
+    - role: ../
+      boss__kubernetes__kubeadm__install_method: "pkg"
+      tags: [ 'worker', 'install', 'worker_install']
+      task: prepare
+      boss__kubernetes__kubeadm__run_prepare: True
+      boss__kubernetes__kubeadm__override_node_ip: True
+
 # ####################################################################################################
 # # COMPILE nvm SETUP
 # ####################################################################################################
-# - hosts: servers
-#   tags:
-#     - nvm
-#     - tools
-#   vars:
-#     bossjones__user: vagrant
-#     bossjones__group: vagrant
-#     node_version: '8'
-#   become: yes
-#   become_method: sudo
-#   environment:
-#     SHELL: /bin/bash
-#   pre_tasks:
-#     - name: '/etc/profile.d'
-#       file:
-#         path: "/etc/profile.d"
-#         state: directory
-#   tasks:
-#     - name: check nvm versions installed for system
-#       shell: $SHELL -lc "command -v nvm"
-#       register: nvm_exists
-#       changed_when: false
-#       ignore_errors: yes
-#       failed_when: false
-#       check_mode: no
+- hosts: servers
+  tags:
+    - nvm
+    - tools
+  vars:
+    bossjones__user: vagrant
+    bossjones__group: vagrant
+    node_version: 'stable'
+  become: yes
+  become_method: sudo
+  environment:
+    SHELL: /bin/bash
+  pre_tasks:
+    - name: '/etc/profile.d'
+      file:
+        path: "/etc/profile.d"
+        state: directory
+  tasks:
+    - name: check nvm versions installed for system
+      shell: $SHELL -lc "command -v nvm"
+      register: nvm_exists
+      changed_when: false
+      ignore_errors: yes
+      failed_when: false
+      check_mode: no
 
-#     - name: If nvm does not exist, call the nvm installer script
-#       shell: |
-#             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
-#       register: nvm_installed
-#       become: yes
-#       become_user: "{{bossjones__user}}"
+    - name: If nvm does not exist, call the nvm installer script
+      shell: |
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+      register: nvm_installed
+      become: yes
+      become_user: "{{bossjones__user}}"
 
-#     - name: check nvm versions installed for system
-#       shell: $SHELL -lc "nvm install {{node_version}}"
-#       register: nvm_install
-#       changed_when: false
-#       ignore_errors: yes
-#       failed_when: false
-#       check_mode: no
-#       become: yes
-#       become_user: "{{bossjones__user}}"
+    - name: check nvm versions installed for system
+      shell: $SHELL -lc "nvm install {{node_version}}"
+      register: nvm_install
+      changed_when: false
+      ignore_errors: yes
+      failed_when: false
+      check_mode: no
+      become: yes
+      become_user: "{{bossjones__user}}"
 
-#     - name: check nvm versions installed for system
-#       shell: $SHELL -lc "nvm use {{node_version}}; npm install npm@latest -g"
-#       register: npm_upgrade
-#       changed_when: false
-#       ignore_errors: yes
-#       failed_when: false
-#       check_mode: no
-#       become: yes
-#       become_user: "{{bossjones__user}}"
+    - name: check nvm versions installed for system
+      shell: $SHELL -lc "nvm use {{node_version}}; npm install npm@latest -g"
+      register: npm_upgrade
+      changed_when: false
+      ignore_errors: yes
+      failed_when: false
+      check_mode: no
+      become: yes
+      become_user: "{{bossjones__user}}"
 
-#     - name: check nvm versions installed for system
-#       shell: $SHELL -lc "nvm use {{node_version}}; npm install {{item}}"
-#       register: npm_install_global
-#       changed_when: false
-#       ignore_errors: yes
-#       failed_when: false
-#       check_mode: no
-#       with_items:
-#         - device-discovery-cli
-#         - diff-so-fancy
-#         - docker-enter
-#         - docker-loghose
-#         - figlet-cli
-#         - get-port-cli
-#         - getmac
-#         - gtop
-#         - jsonlint
-#         - pathogen-pm
-#         - speed-test
-#         - spoof
-#         - tldr
-#         - vtop
-#         - whereami
-#         - wireless-tools
-#         - yaml-lint
-#       become: yes
-#       become_user: "{{bossjones__user}}"
+    - name: check nvm versions installed for system
+      shell: $SHELL -lc "nvm use {{node_version}}; npm install {{item}}"
+      register: npm_install_global
+      changed_when: false
+      ignore_errors: yes
+      failed_when: false
+      check_mode: no
+      with_items:
+        - device-discovery-cli
+        - diff-so-fancy
+        - docker-enter
+        - docker-loghose
+        - figlet-cli
+        - get-port-cli
+        - getmac
+        - gtop
+        - jsonlint
+        - pathogen-pm
+        - speed-test
+        - spoof
+        - tldr
+        - vtop
+        - whereami
+        - wireless-tools
+        - yaml-lint
+      become: yes
+      become_user: "{{bossjones__user}}"
 
-#     - name: check nvm versions installed for system
-#       shell: $SHELL -lc "nvm alias default {{node_version}}"
-#       register: nvm_install
-#       changed_when: false
-#       ignore_errors: yes
-#       failed_when: false
-#       check_mode: no
-#       become: yes
-#       become_user: "{{bossjones__user}}"
-
-
-# # # # no_log: true
-# # - hosts: servers
-# #   gather_facts: True
-# #   become: yes
-# #   become_method: sudo
-# #   tags:
-# #     - docker
-# #     - docker-provision
-# #   roles:
-# #     - role: geerlingguy.pip
-# #     - role: boss-ansible-role-docker
-# #       # boss__docker__version: "18.06"
-# #       boss__docker__users: ["vagrant"]
-# #       boss__docker__daemon_options:
-# #         - "--dns 8.8.8.8 -H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
-# #       boss__docker__install_method: "shell"
-
-# # # - hosts: primary-master
-# # #   name: primary-master (or master in general) - it applies to both ha and non-ha
-# # #   gather_facts: True
-# # #   become: yes
-# # #   become_method: sudo
-# # #   # TODO: remove this 11/28/2018
-# # #   any_errors_fatal: yes
-# # #   tags:
-# # #   - master
-# # #   - install
-# # #   - master_install
-# # #   - ha
-# # #   roles:
-# # #     - role: ../
-# # #       boss__kubernetes__kubeadm__install_method: "shell"
-# # #       tags: [ 'primary-master', 'master', 'install', 'master_install']
-# # #       task: prepare
-# # #       boss__kubernetes__kubeadm__run_prepare: True
-
-# # # # # - hosts: dns_servers
-# # # # #   gather_facts: True
-# # # # #   become: yes
-# # # # #   become_method: sudo
-# # # # #   tags:
-# # # # #     - debug
-# # # # #   roles:
-# # # # #     - role: boss-ansible-role-debug
-
+    - name: check nvm versions installed for system
+      shell: $SHELL -lc "nvm alias default {{node_version}}"
+      register: nvm_install
+      changed_when: false
+      ignore_errors: yes
+      failed_when: false
+      check_mode: no
+      become: yes
+      become_user: "{{bossjones__user}}"
 
 
 # # # # ## proper reset of any previous cluster (if any)
