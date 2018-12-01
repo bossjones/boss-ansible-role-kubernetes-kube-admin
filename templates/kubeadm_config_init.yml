@@ -1,0 +1,24 @@
+---
+# USAGE: kubeadm init --config config.yaml
+
+# SOURCE: https://medium.com/containerum/4-ways-to-bootstrap-a-kubernetes-cluster-de0d5150a1e4
+apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+networking:
+  serviceSubnet: 10.96.0.0/12
+  podSubnet: 10.224.0.0/16
+etcd:
+  endpoints: # Use this to specify etcd servers
+  - https://10.0.0.1:2379
+  - https://10.0.0.2:2379
+  - https://10.0.0.3:2379
+  caFile: /etc/kubernetes/etcd/ca.pem
+  certFile: /etc/kubernetes/etcd/etcd.pem
+  keyFile: /etc/kubernetes/etcd/etcd-key.pem
+apiServerCertSANs: # Use this to specify IP SANs for certificates
+  - 172.16.0.1
+  - 172.16.0.2
+  - 172.16.0.3
+  - 127.0.0.1
+api:
+  advertiseAddress: 172.16.0.1

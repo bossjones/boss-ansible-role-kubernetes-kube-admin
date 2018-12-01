@@ -136,17 +136,21 @@ root@master:~#
 # Note that kubeadm version 1.8.x does not have support for coredns feature gate.
 # Upgrade kubeadm to latest version before running below command:
 
-
+# REMOVED: --pod-network-cidr=10.200.0.0/16
+# REMOVED: --ignore-preflight-errors="all"
 # on master node run(dry-run)
 # With "CoreDNS" addon (recommended)
 export NODENAME=$(hostname -s)
-kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --node-name $NODENAME --dry-run
+export _KUBE_VERSION=$(dpkg -l | grep kubeadm | awk '{print $3}' | sed 's,-.*,,g')
+kubeadm init --kubernetes-version=$_KUBE_VERSION --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.32.0.0/12 --feature-gates=CoreDNS=true --node-name $NODENAME --service-cidr=10.96.0.0/12 --dry-run
 
-
+# REMOVED: --pod-network-cidr=10.200.0.0/16
+# REMOVED: --ignore-preflight-errors="all"
 # Actual run - master node run
 # With "CoreDNS" addon (recommended)
 export NODENAME=$(hostname -s)
-kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --node-name $NODENAME >> cluster_initialized.txt
+export _KUBE_VERSION=$(dpkg -l | grep kubeadm | awk '{print $3}' | sed 's,-.*,,g')
+kubeadm init --kubernetes-version=$_KUBE_VERSION --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.32.0.0/12 --feature-gates=CoreDNS=true --node-name $NODENAME --service-cidr=10.96.0.0/12 >> cluster_initialized.txt
 ```
 
 
