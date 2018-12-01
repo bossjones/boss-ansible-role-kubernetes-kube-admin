@@ -64,6 +64,58 @@ NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github
 NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
 NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
 
+
+
+
+### kubeadm pre-reqs
+
+```
+
+# configuring Kubernetes to use the same CGroup driver as Docker:
+# SOURCE: https://medium.com/@lizrice/kubernetes-in-vagrant-with-kubeadm-21979ded6c63
+
+sed -i '0,/ExecStart=/s//Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=cgroupfs"\n&/' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+```
+
+Before:
+
+```
+root@master:~# cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+# Note: This dropin only works with kubeadm and kubelet v1.11+
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+# This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
+EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+# This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
+# the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
+EnvironmentFile=-/etc/default/kubelet
+ExecStart=
+ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+```
+
+After(dry run test w/ sed):
+
+```
+root@master:~# sed '0,/ExecStart=/s//Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=cgroupfs"\n&/' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+# Note: This dropin only works with kubeadm and kubelet v1.11+
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+# This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
+EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+# This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
+# the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
+EnvironmentFile=-/etc/default/kubelet
+Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=cgroupfs"
+ExecStart=
+ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+root@master:~#
+```
+
+
+### kubeadm init
+
 ```
 # Pick one DNS add-on: either "kube-dns" or "CoreDNS".  If your environment setup is for "Kubernetes federation" or "SDN-C Geographic Redundancy" then use "CoreDNS" addon.
 # Note that kubeadm version 1.8.x does not have support for coredns feature gate.
@@ -75,7 +127,7 @@ NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github
 kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --dry-run
 
 
-# Actual run - master node run(dry-run)
+# Actual run - master node run
 # With "CoreDNS" addon (recommended)
 kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true >> cluster_initialized.txt
 ```
