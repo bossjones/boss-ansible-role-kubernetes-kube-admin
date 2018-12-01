@@ -56,12 +56,26 @@ An optional section for the role authors to include contact information, or a we
 
 # Bootstrap kubernetes master
 
-```
-# on master node run(dry-run)
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
+NOTE: Before attempting to debug anything, look at this!!!!!!!! - https://github.com/weaveworks/weave/issues/3363
 
-kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --dry-run
+```
+# Pick one DNS add-on: either "kube-dns" or "CoreDNS".  If your environment setup is for "Kubernetes federation" or "SDN-C Geographic Redundancy" then use "CoreDNS" addon.
+# Note that kubeadm version 1.8.x does not have support for coredns feature gate.
+# Upgrade kubeadm to latest version before running below command:
+
+
+# on master node run(dry-run)
+# With "CoreDNS" addon (recommended)
+kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true --dry-run
+
 
 # Actual run - master node run(dry-run)
-
-kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" >> cluster_initialized.txt
+# With "CoreDNS" addon (recommended)
+kubeadm init --apiserver-advertise-address=192.168.50.101 --pod-network-cidr=10.200.0.0/16 --ignore-preflight-errors="all" --feature-gates=CoreDNS=true >> cluster_initialized.txt
 ```
