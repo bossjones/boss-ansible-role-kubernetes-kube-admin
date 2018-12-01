@@ -63,15 +63,15 @@
     - true  # Run as root
     - false # Run as SSH user
 
-- name: Add export KUBECONFIG=/etc/kubernetes/admin.conf to root/ssh user bash_profile
-  lineinfile:
-    path: '$HOME/.bash_profile'
-    line: 'export KUBECONFIG=/etc/kubernetes/admin.conf'
-    create: yes
-  become: '{{ item }}'
-  with_items:
-    - true  # Run as root
-    - false # Run as SSH user
+# - name: Add export KUBECONFIG=/etc/kubernetes/admin.conf to root/ssh user bash_profile
+#   lineinfile:
+#     path: '$HOME/.bash_profile'
+#     line: 'export KUBECONFIG=/etc/kubernetes/admin.conf'
+#     create: yes
+#   become: '{{ item }}'
+#   with_items:
+#     - true  # Run as root
+#     - false # Run as SSH user
 
 
 - name: create directory ~/.kube for root/ssh user
@@ -105,57 +105,79 @@
 # TODO: remove this
 # - file: name=/home/ubuntu/.kube/config state=file owner=ubuntu
 
-- name: 'add source <(kubectl completion bash) to bash_profile'
-  blockinfile:
-    dest: '$HOME/.bash_profile'
-    block: |
-      source <(kubectl completion bash)
-    state: present
+# - name: 'add source <(kubectl completion bash) to bash_profile'
+#   blockinfile:
+#     dest: '$HOME/.bash_profile'
+#     block: |
+#       source <(kubectl completion bash)
+#     state: present
+#     create: yes
+#     mode: 0644
+#   become: '{{ item }}'
+#   with_items:
+#     - true  # Run as root
+#     - false # Run as SSH user
+
+# - name: 'add source <(kubectl completion bash) to bashrc'
+#   blockinfile:
+#     dest: '$HOME/.bashrc'
+#     block: |
+#       source <(kubectl completion bash)
+#     state: present
+#     create: yes
+#     mode: 0644
+#   become: '{{ item }}'
+#   with_items:
+#     - true  # Run as root
+#     - false # Run as SSH user
+
+
+- name: Add source <(kubectl completion bash) to root/ssh user bashrc
+  lineinfile:
+    path: '$HOME/.bashrc'
+    line: 'source <(kubectl completion bash)'
     create: yes
-    mode: 0644
   become: '{{ item }}'
   with_items:
     - true  # Run as root
     - false # Run as SSH user
 
-- name: 'add source <(kubectl completion bash) to bashrc'
-  blockinfile:
-    dest: '$HOME/.bashrc'
-    block: |
-      source <(kubectl completion bash)
-    state: present
+
+- name: Add source <(kubeadm completion bash) to root/ssh user bashrc
+  lineinfile:
+    path: '$HOME/.bashrc'
+    line: 'source <(kubeadm completion bash)'
     create: yes
-    mode: 0644
   become: '{{ item }}'
   with_items:
     - true  # Run as root
     - false # Run as SSH user
 
-- name: 'add source <(kubeadm completion bash) to bash_profile'
-  blockinfile:
-    dest: '$HOME/.bash_profile'
-    block: |
-      source <(kubeadm completion bash)
-    state: present
-    create: yes
-    mode: 0644
-  become: '{{ item }}'
-  with_items:
-    - true  # Run as root
-    - false # Run as SSH user
+# - name: 'add source <(kubeadm completion bash) to bash_profile'
+#   blockinfile:
+#     dest: '$HOME/.bash_profile'
+#     block: |
+#       source <(kubeadm completion bash)
+#     state: present
+#     create: yes
+#     mode: 0644
+#   become: '{{ item }}'
+#   with_items:
+#     - true  # Run as root
+#     - false # Run as SSH user
 
-- name: 'add source <(kubeadm completion bash) to bashrc'
-  blockinfile:
-    dest: '$HOME/.bashrc'
-    block: |
-      source <(kubeadm completion bash)
-    state: present
-    create: yes
-    mode: 0644
-  become: '{{ item }}'
-  with_items:
-    - true  # Run as root
-    - false # Run as SSH user
+# - name: 'add source <(kubeadm completion bash) to bashrc'
+#   blockinfile:
+#     dest: '$HOME/.bashrc'
+#     block: |
+#       source <(kubeadm completion bash)
+#     state: present
+#     create: yes
+#     mode: 0644
+#   become: '{{ item }}'
+#   with_items:
+#     - true  # Run as root
+#     - false # Run as SSH user
 
 # - lineinfile:
 #     path: /root/.bash_profile
