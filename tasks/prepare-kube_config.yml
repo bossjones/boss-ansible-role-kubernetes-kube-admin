@@ -36,6 +36,23 @@
   - kubeadm
   - kubelet
 
+
+- name: 'Configure KUBELET_EXTRA_ARGS=--node-ip=192.168.50.101 --cgroup-driver=cgroupfs for kubelet systemd unit'
+  template:
+    src: "20-kubelet-node-ip.conf.j2"
+    dest: "/etc/systemd/system/kubelet.service.d/20-kubelet-node-ip.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  register: boss__docker__register_override_node_ip
+  when: boss__kubernetes__kubeadm__override_node_ip
+  notify:
+  - Reload systemd # already by other handler
+  - Restart kubelet
+  tags:
+  - kubeadm
+  - kubelet
+
 - name: Create kubeadm sysctl file
   copy: src=90-kubeadm.conf dest=/etc/sysctl.d/90-kubeadm.conf
   tags:
