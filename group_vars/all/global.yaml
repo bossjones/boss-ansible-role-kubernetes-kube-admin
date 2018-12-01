@@ -162,7 +162,7 @@ allow_restart: True ## Default False
 
 #####
 ## Iptables
-iptables_setup: False # Default is True.
+iptables_setup: True # Default is True.
 # This is not ideal or perfect! Review code and decide. It will disable&mask firewalld service (if exists), set default policies ACCEPT, and it will remove REJECT rules from all chains (INPUT,FW,OUT) with a commands like: iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited (for each).
 # If still issues, debug iptables on both master and nodes with:
 # watch -n1 iptables -vnL
