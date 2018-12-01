@@ -455,34 +455,61 @@
 
 
 
+# ##############################################################################
+# # MASTER: Now that the master is up and running, let's deploy weave-net to it
+# ##############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - deploy weave-net and other post_deploy tasks
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - post_deploy
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
+#       task: post_deploy
+
+
+
+
 ##############################################################################
-# MASTER: Now that the master is up and running, let's deploy weave-net to it
+# WORKERS/NODES: Join cluster!
 ##############################################################################
-- hosts: primary-master
-  name: (primary-master) - deploy weave-net and other post_deploy tasks
+- hosts: kubernetes-nodes
+  name: (kubernetes-nodes) - make workers join kubernetes cluster
   gather_facts: True
   become: yes
   become_method: sudo
   environment:
     DEBIAN_FRONTEND: noninteractive
-  vars:
-    # hosts_file: /etc/hosts.molecule
-    boss__docker__version: "18.06"
-    boss__docker__users: ["vagrant"]
-    boss__ntp__timezone: 'America/New_York'
   tags:
     - docker
     - docker-provision
-    - master
+    - worker
     - install
-    - master_install
+    - worker_install
     - ha
-    - primary_master
-    - post_deploy
+    - node_join
+    - worker_join
   roles:
     # role: boss-ansible-role-kubernetes-kubeadm
     - role: ../
-      boss__kubernetes__kubeadm__install_method: "pkg"
-      tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
-      task: post_deploy
-
+      tags: [ 'primary-worker', 'worker', 'install', 'worker_install', 'node_join']
+      task: nodes

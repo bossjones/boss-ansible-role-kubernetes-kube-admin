@@ -7,7 +7,7 @@
 ### Generate a token&hash on master and use them
 - block:
   - set_fact:
-      env_kc: '{{ proxy_env |default({}) | combine ({"PATH" : "/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin"  }) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+      env_kc: '{{ proxy_env |default({}) | combine ({"PATH" : "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"  }) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
 
   - name: get join command from master node, and set fact on workers
     shell: cat /etc/kubeadm-join.sh
@@ -22,75 +22,37 @@
     changed_when: false
 
 
-  - name: Display registered value kubeadm_token_whash_n
+  - name: 'Display registered value kubeadm_token_whash_n.stdout_lines[0]'
     debug:
-      var: kubeadm_token_whash_n.stdout_lines
+      var: kubeadm_token_whash_n.stdout_lines[0]
     changed_when: false
     tags:
     - cluster_status
 
-#   - name: add API server JoinConfiguration.discoveryTokenAPIServers
-#     set_fact:
-#       JoinConfiguration: "{{ JoinConfiguration | combine ( { 'discoveryTokenAPIServers': [master_name + ':' + InitConfiguration.apiEndpoint.bindPort | default (6443) | string ] }, recursive=True) }}"
-
-#   - name: add discovery token hash to JoinConfiguration.discoveryTokenCACertHashes
-#     set_fact:
-#       JoinConfiguration: "{{ JoinConfiguration | combine ( { 'discoveryTokenCACertHashes': [kubeadm_token_whash_n.stdout_lines[1]] }, recursive=True) }}"
-
-#   ### Add token must be the last in the block, otherwise condition (JoinConfiguration.token is not defined) resolves to false...
-#   - name: add token to the JoinConfiguration.token
-#     set_fact:
-#       JoinConfiguration: "{{ JoinConfiguration | combine ( { 'token': kubeadm_token_whash_n.stdout_lines[0] }, recursive=True) }}"
-
-#   when:
-#   - JoinConfiguration.token is not defined
-#   - InitConfiguration.bootstrapTokens is not defined or InitConfiguration.bootstrapTokens[0].token is not defined
-#   tags:
-#   - token
-
-# - name: Add the InitConfiguration.bootstrapTokens[0] to the JoinConfiguration
-#   set_fact:
-#     JoinConfiguration: "{{ JoinConfiguration | combine ( { 'token': kubeadm_token }, recursive=True) }}"
-#   when:
-#   - JoinConfiguration.token is not defined
-#   tags:
-#   - token
-
-#################################################################################################################################################
-#################################################################################################################################################
-#################################################################################################################################################
-#################################################################################################################################################
-#################################################################################################################################################
-#################################################################################################################################################
-#################################################################################################################################################
-#################################################################################################################################################
-
-
-- name: 'cat /etc/kubeadm-join.sh'
-  shell: "cat /etc/kubeadm-join.sh"
-  register: cat_kubeadm_join
-  when: inventory_hostname == master_hostname
-
+# TEMPORARY DISABLED
 - name: kubeadm_join
   set_fact:
-    kubeadm_join: "{{cat_kubeadm_join.stdout}}"
-  when: inventory_hostname == master_hostname
+    kubeadm_join: "{{kubeadm_token_whash_n.stdout_lines[0]}}"
+  # when: inventory_hostname == master_hostname
+
 
 - name: join nodes
   shell: >
-     systemctl stop kubelet ; kubeadm reset ;
-     echo "{{hostvars[master_hostname].kubeadm_join}}" >/etc/kubeadm-join.sh ;
-     bash /etc/kubeadm-join.sh
+     systemctl stop kubelet ; kubeadm reset --force ;
+     echo "{{kubeadm_join}}" > /etc/kubeadm-join.sh ;
+     cat /etc/kubeadm-join.sh ;
+     bash /etc/kubeadm-join.sh ;
   args:
     creates: /etc/kubeadm-join.sh
-  when: inventory_hostname != master_hostname
 
 - name: checking all nodes up
   shell: >
       export KUBECONFIG=/etc/kubernetes/admin.conf ;
       kubectl get nodes {{item}}
   register: result
+  environment: '{{env_kc}}'
   until: result.stdout.find("Ready") != -1
+  delegate_to: "{{groups['primary-master'][0]}}"
   retries: 100
   delay: 10
   with_items: "{{ groups['nodes'] }}"
