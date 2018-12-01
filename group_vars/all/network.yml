@@ -34,8 +34,8 @@ podNetwork: 'weavenet'
 weavenet:
   - podSubnet: 10.32.0.0/12
   - urls:
-    #- "https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&env.IPALLOC_RANGE={{POD_NETWORK_CIDR | default ('10.32.0.0/12') }}"
-    - "https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&env.IPALLOC_RANGE='10.32.0.0/12'"
+    - "https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&env.IPALLOC_RANGE={{POD_NETWORK_CIDR | default ('10.32.0.0/12') }}"
+    # - "https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&env.IPALLOC_RANGE='10.32.0.0/12'"
 
 # Network settings
 # '10.244.0.0/16'  # Exactly this one is required when Flannel network is used. If you other network solutions, commented out this entry.

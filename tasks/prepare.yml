@@ -11,6 +11,7 @@
   when: boss__kubernetes__kubeadm__ntp_setup | default (True)
 - include: prepare-various.yml
 - include: prepare-completion.yml
+# - include: reboot.yml
 
 
 # - include: selinux.yml # THIS MIGHT REBOOT MACHINE!!!
