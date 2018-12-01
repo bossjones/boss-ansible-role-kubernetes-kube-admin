@@ -4,10 +4,11 @@
 
 # Run everything like this, and just include files
 # ---
-# - include: network.yml
-# - include: post_cluster_deploy.yml
-# - include: sanity.yml
-# - include: taints.yml
+- include: post_deploy-network.yml
+- include: post_deploy-addons.yml
+- include: post_deploy-sanity.yml
+- include: post_deploy-tains-master.yml
+  when: is_master | default (False)
 
 
 #########################################################

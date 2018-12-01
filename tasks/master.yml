@@ -17,14 +17,14 @@
 - name: initialize kube
   shell: >
        kubeadm reset --force &&
-       sysctl -p &&
-       kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=10.244.0.0/16
+       {{boss__kubernetes__kubeadm__kubeadm_init_cmd}}
   args:
     creates: /etc/kubeadm-join.sh
   register: kubeadm_out
 
 
-- lineinfile:
+- name: get join string from stdout in kubeadm init command
+  lineinfile:
     path: /etc/kubeadm-join.sh
     line: "{{kubeadm_out.stdout_lines[-1]}}"
     create: yes
@@ -36,15 +36,16 @@
 - name: create folder /etc/kubectl
   file: name=/etc/kubectl state=directory
 
-- name: fix configmap for proxy
-  shell: >
-    export KUBECONFIG=/etc/kubernetes/admin.conf ;
-    kubectl -n kube-system get cm/kube-proxy -o yaml
-    | sed -e 's!clusterCIDR: ""!clusterCIDR: "10.0.0.0/24"!' >/etc/kubectl/kube-proxy.map ;
-    kubectl -n kube-system replace cm/kube-proxy -f /etc/kubectl/kube-proxy.map ;
-    kubectl -n kube-system delete pods -l k8s-app=kube-proxy
-  args:
-    creates: /etc/kubectl/kube-proxy.map
+# FIXME: Figure out if we need this damn cluster cidr !!!!!!!!!! 12/1/2018
+# - name: fix configmap for proxy
+#   shell: >
+#     export KUBECONFIG=/etc/kubernetes/admin.conf ;
+#     kubectl -n kube-system get cm/kube-proxy -o yaml
+#     | sed -e 's!clusterCIDR: ""!clusterCIDR: "10.0.0.0/24"!' >/etc/kubectl/kube-proxy.map ;
+#     kubectl -n kube-system replace cm/kube-proxy -f /etc/kubectl/kube-proxy.map ;
+#     kubectl -n kube-system delete pods -l k8s-app=kube-proxy
+#   args:
+#     creates: /etc/kubectl/kube-proxy.map
 
 
 ####################################################
@@ -75,7 +76,7 @@
 
 - name: create directory ~/.kube for root/ssh user
   # file: path='$HOME/.kube' state=directory owner=vagrant
-  file: path='$HOME/.kube' state=directory owner=vagrant
+  file: path='$HOME/.kube' state=directory
   become: '{{ item }}'
   with_items:
     - true  # Run as root
@@ -83,32 +84,71 @@
 
 - name: create file ~/.kube/config for root/ssh user
   # file: path='$HOME/.kube' state=directory owner=vagrant
-  file: path='$HOME/.kube/config' state=file owner=vagrant
+  file: path='$HOME/.kube/config' state=file
   become: '{{ item }}'
   with_items:
     - true  # Run as root
     - false # Run as SSH user
 
 # TODO: remove this
-- file: path=/home/ubuntu/.kube state=directory owner=ubuntu
+# - file: path=/home/ubuntu/.kube state=directory owner=ubuntu
 
 # TODO: remove this
 - command: cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
 
 # TODO: remove this
-- command: cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+# - command: cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 
 # TODO: remove this
 - file: name=/home/vagrant/.kube/config state=file owner=vagrant
 
 # TODO: remove this
-- file: name=/home/ubuntu/.kube/config state=file owner=ubuntu
+# - file: name=/home/ubuntu/.kube/config state=file owner=ubuntu
 
 - name: 'add source <(kubectl completion bash) to bash_profile'
   blockinfile:
     dest: '$HOME/.bash_profile'
     block: |
       source <(kubectl completion bash)
+    state: present
+    create: yes
+    mode: 0644
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+    - false # Run as SSH user
+
+- name: 'add source <(kubectl completion bash) to bashrc'
+  blockinfile:
+    dest: '$HOME/.bashrc'
+    block: |
+      source <(kubectl completion bash)
+    state: present
+    create: yes
+    mode: 0644
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+    - false # Run as SSH user
+
+- name: 'add source <(kubeadm completion bash) to bash_profile'
+  blockinfile:
+    dest: '$HOME/.bash_profile'
+    block: |
+      source <(kubeadm completion bash)
+    state: present
+    create: yes
+    mode: 0644
+  become: '{{ item }}'
+  with_items:
+    - true  # Run as root
+    - false # Run as SSH user
+
+- name: 'add source <(kubeadm completion bash) to bashrc'
+  blockinfile:
+    dest: '$HOME/.bashrc'
+    block: |
+      source <(kubeadm completion bash)
     state: present
     create: yes
     mode: 0644
@@ -138,22 +178,24 @@
 
 # FIXME: We need to nuke this 12/1/2018
 
-- sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 state=present reload=yes sysctl_set=yes
+# NOTE: We moved this over to post_deploy.yml
 
-- sysctl: name=net.bridge.bridge-nf-call-iptables value=1 state=present reload=yes sysctl_set=yes
+# - sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 state=present reload=yes sysctl_set=yes
 
-- name: install weave net
-  shell: >
-    export KUBECONFIG=/etc/kubernetes/admin.conf ;
-    export kubever=$(sudo kubectl version | base64 | tr -d '\n') ;
-    curl --location "https://cloud.weave.works/k8s/net?k8s-version=$kubever" >/etc/kubectl/weave.yml ;
-    kubectl apply -f /etc/kubectl/weave.yml
+# - sysctl: name=net.bridge.bridge-nf-call-iptables value=1 state=present reload=yes sysctl_set=yes
 
-- name: Verify that weave-net is running correctly
-  shell: >
-    export KUBECONFIG=/etc/kubernetes/admin.conf ;
-    kubectl get pods -n kube-system -l name=weave-net
-  register: result
-  until: result.stdout.find("Running") != -1
-  retries: 100
-  delay: 10
+# - name: install weave net
+#   shell: >
+#     export KUBECONFIG=/etc/kubernetes/admin.conf ;
+#     export kubever=$(sudo kubectl version | base64 | tr -d '\n') ;
+#     curl --location "https://cloud.weave.works/k8s/net?k8s-version=$kubever" >/etc/kubectl/weave.yml ;
+#     kubectl apply -f /etc/kubectl/weave.yml
+
+# - name: Verify that weave-net is running correctly
+#   shell: >
+#     export KUBECONFIG=/etc/kubernetes/admin.conf ;
+#     kubectl get pods -n kube-system -l name=weave-net
+#   register: result
+#   until: result.stdout.find("Running") != -1
+#   retries: 100
+#   delay: 10

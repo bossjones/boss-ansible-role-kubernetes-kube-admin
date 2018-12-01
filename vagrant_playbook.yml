@@ -228,10 +228,10 @@
       boss__ntp__timezone: 'America/New_York'
 
 ##############################################################################
-# Install k8 prepre steps on primary masters
+# MASTER: Install docker/k8 prepare steps on primary masters
 ##############################################################################
 - hosts: primary-master
-  name: (primary-master) - Install k8 prepre steps on primary masters
+  name: (primary-master) - Install docker and k8 - prepare steps on primary masters
   gather_facts: True
   become: yes
   become_method: sudo
@@ -270,11 +270,12 @@
       boss__kubernetes__kubeadm__override_node_ip: True
 
 
+
 ##############################################################################
-# Install k8 prepre steps on kubernetes-nodes
+# Install k8 prepare steps on kubernetes-nodes
 ##############################################################################
 - hosts: kubernetes-nodes
-  name: (kubernetes-nodes) - Install k8 prepre steps on kubernetes-nodes
+  name: (kubernetes-nodes) - Install docker and k8 - prepare steps on kubernetes-nodes
   gather_facts: True
   become: yes
   become_method: sudo
@@ -282,7 +283,6 @@
     DEBIAN_FRONTEND: noninteractive
 
   vars:
-    # hosts_file: /etc/hosts.molecule
     boss__docker__version: "18.06"
     boss__docker__users: ["vagrant"]
     boss__ntp__timezone: 'America/New_York'
@@ -312,6 +312,7 @@
       task: prepare
       boss__kubernetes__kubeadm__run_prepare: True
       boss__kubernetes__kubeadm__override_node_ip: True
+
 
 # ####################################################################################################
 # # COMPILE nvm SETUP
@@ -407,17 +408,79 @@
       become: yes
       become_user: "{{bossjones__user}}"
 
+##########################################################################################################################################
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+# OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
+##########################################################################################################################################
 
-# # # # ## proper reset of any previous cluster (if any)
-# # # # # - hosts: primary-master
-# # # # #   become: yes
-# # # # #   become_method: sudo
-# # # # #   tags:
-# # # # #   - reset
-# # # # #   - master
-# # # # #   roles:
-# # # # #   - { role: helm, task: helm_reset, tags: [ 'reset', 'helm_reset' ] }
-# # # # #   - { role: storage, task: remove_pvs, tags: [ 'reset', 'storage_reset', 'pvs_reset' ] }
-# # # # #   - { role: storage, task: nfs_reset, tags: [ 'reset', 'storage_reset', 'nfs_reset' ] }
-# # # # #   - { role: storage, task: rook_reset, tags: [ 'reset', 'storage_reset', 'rook_reset' ] }
-# # # # #   - { role: tools, task: reset_drain, tags: [ 'reset', 'node_reset', 'drain', 'node_drain' ] } #done on master, affecting nodes
+# ##############################################################################
+# # Run kubeadm init and start up master
+# ##############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - Run kubeadm init and start up master
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - kubeadm_init
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'kubeadm_init']
+#       task: master
+
+
+
+# ##############################################################################
+# # MASTER: Now that the master is up and running, let's deploy weave-net to it
+# ##############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - deploy weave-net and other post_deploy tasks
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - post_deploy
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
+#       task: post_deploy
+

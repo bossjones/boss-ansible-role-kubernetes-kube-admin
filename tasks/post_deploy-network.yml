@@ -1,0 +1,50 @@
+########################################################
+# network.yml
+########################################################
+---
+- set_fact:
+    env_kc: '{{ proxy_env |default({}) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+  tags:
+  - always
+
+# Not clear if mandatory for weave:
+# https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
+- name: Copy weave net script
+  environment: '{{ proxy_env | default ({}) }}'
+  get_url: url=https://raw.githubusercontent.com/weaveworks/weave/master/weave dest=/usr/local/bin/weave mode=u+rxw force=yes
+  ignore_errors: yes  # Currently there is no way to check if the user is using weave
+  tags:
+  - weave
+  - network
+
+- name: "Create cluster network weave using url: '{{item}}'"
+  command: /usr/bin/kubectl apply -f {{ item }}
+  with_items: '{{ boss__kubernetes__kubeadm__k8s_network_addons_urls }}'
+  environment: '{{env_kc}}'
+  tags:
+  - k8s_network_addons
+  - network
+
+- name: sanity - wait for alls pod to be running (besides kube-dns for now, as it might be forced to a node if master did not allow it due to tains)
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  shell: "kubectl get --namespace kube-system pods --no-headers | grep -v -w 'Running' | grep -v 'kube-dns' || true "
+  register: command_result
+  tags:
+  - k8s_network_addons
+  - sanity
+  - network
+  until: command_result.stdout == ""
+  retries: 40
+  delay: 3
+  changed_when: false
+
+
+- name: Verify that weave-net is running correctly
+  shell: >
+    export KUBECONFIG=/etc/kubernetes/admin.conf ;
+    kubectl get pods -n kube-system -l name=weave-net
+  register: result
+  until: result.stdout.find("Running") != -1
+  retries: 100
+  delay: 10
