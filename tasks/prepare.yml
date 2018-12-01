@@ -6,7 +6,7 @@
 - include: prepare-docker.yml
 - include: prepare-iptables.yml
 # NOTE: DISABLED FOR THE MOMENT [11/30/2018]
-# - include: prepare-kube_config.yml
+- include: prepare-kube_config.yml
 - include: prepare-swap.yml
 - include: prepare-ntpd.yml
   when: ntp_setup | default (True)

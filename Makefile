@@ -168,7 +168,7 @@ run-ansible-docker:
 	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags docker-provision --flush-cache
 
 run-ansible-master:
-	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags "master"
+	@ansible-playbook -i inventory.ini vagrant_playbook.yml -v --tags primary_master
 
 run-ansible-timezone:
 	@ansible-playbook -i inventory.ini timezone.yml -v

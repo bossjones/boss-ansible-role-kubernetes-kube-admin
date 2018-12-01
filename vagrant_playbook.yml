@@ -235,6 +235,7 @@
     - install
     - master_install
     - ha
+    - primary_master
   roles:
 
     - role: geerlingguy.pip
@@ -251,6 +252,7 @@
       tags: [ 'primary-master', 'master', 'install', 'master_install']
       task: prepare
       boss__kubernetes__kubeadm__run_prepare: True
+      boss__kubernetes__kubeadm__override_node_ip: True
 
 
 # ####################################################################################################

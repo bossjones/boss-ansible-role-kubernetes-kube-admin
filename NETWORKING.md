@@ -47,6 +47,11 @@ kubeadm init --kubernetes-version=$_KUBE_VERSION \
 --feature-gates=CoreDNS=true \
 --node-name $NODENAME \
 --service-cidr=10.96.0.0/12 >> cluster_initialized.txt
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
 
