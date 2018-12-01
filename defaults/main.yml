@@ -100,3 +100,18 @@ boss__kubernetes__kubeadm__nfs_exports:
 
 
 boss__kubernetes__kubeadm__docker_cgroup_driver: cgroupfs
+
+boss__kubernetes__kubeadm__master_node_ip: '192.168.50.101' # vagrant assigned IP address
+
+# boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list: We will use something like {{ boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list | join(' ') } to properly create the value:
+# Environment="KUBELET_EXTRA_ARGS=--node-ip=192.168.50.101 --cgroup-driver=cgroupfs"
+boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list:
+  - "--node-ip={{boss__kubernetes__kubeadm__master_node_ip}}"
+  - "--cgroup-driver={{boss__kubernetes__kubeadm__docker_cgroup_driver}}"
+
+boss__kubernetes__kubeadm__kubeadm_pod_network_cidr: 10.244.0.0/16
+boss__kubernetes__kubeadm__kubeadm_init_cmd: "kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=10.244.0.0/16"
+
+#  kubeadm reset --force &&
+#  sysctl -p &&
+#  kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=10.244.0.0/16

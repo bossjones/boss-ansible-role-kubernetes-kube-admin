@@ -4,6 +4,16 @@
 
 # FIXME: we need to switch out all of the hardcoded values! ( 11/28/2018 )
 
+# ORIG: 12/1/2018
+# - name: initialize kube
+#   shell: >
+#        kubeadm reset --force &&
+#        sysctl -p &&
+#        kubeadm init --apiserver-advertise-address=10.0.0.10 --pod-network-cidr=10.244.0.0/16
+#   args:
+#     creates: /etc/kubeadm-join.sh
+#   register: kubeadm_out
+
 - name: initialize kube
   shell: >
        kubeadm reset --force &&
@@ -12,6 +22,7 @@
   args:
     creates: /etc/kubeadm-join.sh
   register: kubeadm_out
+
 
 - lineinfile:
     path: /etc/kubeadm-join.sh
