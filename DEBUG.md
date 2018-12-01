@@ -1,3 +1,18 @@
+# ip route before adding any additional routes (master)
+
+```
+root@master:~# ip route
+default via 10.0.2.2 dev enp0s3
+10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15
+172.17.0.0/16 dev docker0  proto kernel  scope link  src 172.17.0.1 linkdown
+192.168.50.0/24 dev enp0s8  proto kernel  scope link  src 192.168.50.101
+root@master:~#
+```
+
+
+
+
+
 # kubeadm master --dry-run
 
 ```
