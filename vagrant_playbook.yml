@@ -272,7 +272,7 @@
 
 
 ##############################################################################
-# Install k8 prepare steps on kubernetes-nodes
+# NODES: Install k8 prepare steps on kubernetes-nodes
 ##############################################################################
 - hosts: kubernetes-nodes
   name: (kubernetes-nodes) - Install docker and k8 - prepare steps on kubernetes-nodes

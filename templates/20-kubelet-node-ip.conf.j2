@@ -1,3 +1,3 @@
-# TODO: Make this dynamic
+# {{ansible_managed}}
 [Service]
-Environment="KUBELET_EXTRA_ARGS=--node-ip=192.168.50.101 --cgroup-driver=cgroupfs"
+Environment="KUBELET_EXTRA_ARGS=--node-ip={{boss__kubernetes__kubeadm__master_node_ip}} --cgroup-driver={{boss__kubernetes__kubeadm__docker_cgroup_driver}}"
