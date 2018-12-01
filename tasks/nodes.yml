@@ -1,8 +1,70 @@
-- name: net.bridge.bridge-nf-call-ip6tables=1
-  sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 state=present reload=yes sysctl_set=yes
+---
 
-- name: net.bridge.bridge-nf-call-iptables=1
-  sysctl: name=net.bridge.bridge-nf-call-iptables value=1 state=present reload=yes sysctl_set=yes
+###########################################################################
+# GRAB JOIN COMMAND FROM MASTER!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###########################################################################
+
+### Generate a token&hash on master and use them
+- block:
+  - set_fact:
+      env_kc: '{{ proxy_env |default({}) | combine ({"PATH" : "/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin"  }) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+
+  - name: get join command from master node, and set fact on workers
+    shell: cat /etc/kubeadm-join.sh
+    environment: '{{env_kc}}'
+    # environment -> is required due to a k8s bug which makes kubeadm need internet to generate a token. setting version is not allowed
+    # Optionally using "--config /etc/kubernetes/kubeadm-master.conf" to get rid of the message that it tries to connect to internet for version
+    register: kubeadm_token_whash_n
+    delegate_to: "{{groups['primary-master'][0]}}"
+    run_once: yes
+    # when:
+    # - InitConfiguration is not defined or InitConfiguration.bootstrapTokens is not defined or InitConfiguration.bootstrapTokens[0].token is not defined
+    changed_when: false
+
+
+  - name: Display registered value kubeadm_token_whash_n
+    debug:
+      var: kubeadm_token_whash_n.stdout_lines
+    changed_when: false
+    tags:
+    - cluster_status
+
+#   - name: add API server JoinConfiguration.discoveryTokenAPIServers
+#     set_fact:
+#       JoinConfiguration: "{{ JoinConfiguration | combine ( { 'discoveryTokenAPIServers': [master_name + ':' + InitConfiguration.apiEndpoint.bindPort | default (6443) | string ] }, recursive=True) }}"
+
+#   - name: add discovery token hash to JoinConfiguration.discoveryTokenCACertHashes
+#     set_fact:
+#       JoinConfiguration: "{{ JoinConfiguration | combine ( { 'discoveryTokenCACertHashes': [kubeadm_token_whash_n.stdout_lines[1]] }, recursive=True) }}"
+
+#   ### Add token must be the last in the block, otherwise condition (JoinConfiguration.token is not defined) resolves to false...
+#   - name: add token to the JoinConfiguration.token
+#     set_fact:
+#       JoinConfiguration: "{{ JoinConfiguration | combine ( { 'token': kubeadm_token_whash_n.stdout_lines[0] }, recursive=True) }}"
+
+#   when:
+#   - JoinConfiguration.token is not defined
+#   - InitConfiguration.bootstrapTokens is not defined or InitConfiguration.bootstrapTokens[0].token is not defined
+#   tags:
+#   - token
+
+# - name: Add the InitConfiguration.bootstrapTokens[0] to the JoinConfiguration
+#   set_fact:
+#     JoinConfiguration: "{{ JoinConfiguration | combine ( { 'token': kubeadm_token }, recursive=True) }}"
+#   when:
+#   - JoinConfiguration.token is not defined
+#   tags:
+#   - token
+
+#################################################################################################################################################
+#################################################################################################################################################
+#################################################################################################################################################
+#################################################################################################################################################
+#################################################################################################################################################
+#################################################################################################################################################
+#################################################################################################################################################
+#################################################################################################################################################
+
 
 - name: 'cat /etc/kubeadm-join.sh'
   shell: "cat /etc/kubeadm-join.sh"
