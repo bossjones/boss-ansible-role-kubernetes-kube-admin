@@ -7,7 +7,7 @@
 - include: post_deploy-network.yml
 - include: post_deploy-addons.yml
 - include: post_deploy-sanity.yml
-- include: post_deploy-tains-master.yml
+- include: post_deploy-taints-master.yml
   when: is_master | default (False)
 
 
