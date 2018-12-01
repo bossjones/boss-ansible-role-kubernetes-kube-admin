@@ -56,4 +56,4 @@
   retries: 100
   delay: 10
   with_items: "{{ groups['nodes'] }}"
-  when: inventory_hostname == master_hostname
+  # when: inventory_hostname == master_hostname
