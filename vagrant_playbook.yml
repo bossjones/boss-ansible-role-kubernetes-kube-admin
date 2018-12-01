@@ -96,17 +96,33 @@
         # REQUIRED: https://www.tecmint.com/hegemon-system-monitoring-tool-for-linux/
         - libsensors4-dev
 
-  # - name: "SYSDIG: curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
-  #   shell: |
-  #     bash -lc "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
-  #   args:
-  #     executable: /bin/bash
+  - name: check if /usr/bin/sysdig exists
+    stat:
+      path: /usr/bin/sysdig
+    register: sysdig_result
+    failed_when: false
+    changed_when: false
 
-  # - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh"
-  #   shell: |
-  #     bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
-  #   args:
-  #     executable: /bin/bash
+  - name: "SYSDIG: curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash ONLY if it is not installed already"
+    shell: |
+      bash -lc "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
+    args:
+      executable: /bin/bash
+    when: not sysdig_result.stat.exists
+
+  - name: check if /usr/local/bin/cargo exists
+    stat:
+      path: /usr/local/bin/cargo
+    register: cargo_result
+    failed_when: false
+    changed_when: false
+
+  - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh ONLY if it is not installed already"
+    shell: |
+      bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
+    args:
+      executable: /bin/bash
+    when: not cargo_result.stat.exists
 
   - name: install ctop
     shell: |
