@@ -63,9 +63,13 @@
 
 - name: setup kernel parameters for k8s - reboot might be required, but we will not trigger
   #here RH asks for reboot: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/load_balancer_administration/s1-initial-setup-forwarding-vsa
-  sysctl: name={{item.name}} value={{item.value}} state=present
+  sysctl: name={{item.name}} value={{item.value}} state=present reload=yes sysctl_set=yes
   with_items:
     - {name:  "net.bridge.bridge-nf-call-iptables", value: "1" }
     - {name:  "net.bridge.bridge-nf-call-ip6tables", value: "1" }
     - {name:  "net.ipv4.ip_forward", value: "1" }
+    # TURNING ON PACKET FORWARDING AND NONLOCAL BINDING
+    # In order for the Keepalived service to forward network packets properly to the real servers, each router node must have IP forwarding turned on in the kernel. Log in as root and change the line which reads net.ipv4.ip_forward = 0 in /etc/sysctl.conf to the following:
+    # The changes take effect when you reboot the system. Load balancing in HAProxy and Keepalived at the same time also requires the ability to bind to an IP address that are nonlocal, meaning that it is not assigned to a device on the local system. This allows a running load balancer instance to bind to an IP that is not local for failover. To enable, edit the line in /etc/sysctl.conf that reads net.ipv4.ip_nonlocal_bind to the following:
+    # SOURCE: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/load_balancer_administration/s1-initial-setup-forwarding-vsa
     - {name:  "net.ipv4.ip_nonlocal_bind", value: "1" }

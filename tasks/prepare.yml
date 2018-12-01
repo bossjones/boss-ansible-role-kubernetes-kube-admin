@@ -1,15 +1,14 @@
 ---
 - include: prepare-kernel_modules.yml
-  when: kernel_modules_setup | default (True)
+  when: boss__kubernetes__kubeadm__kernel_modules_setup | default (True)
 - include: prepare-install.yml
-- include: prepare-configure.yml
+# - include: prepare-configure.yml
 - include: prepare-docker.yml
 - include: prepare-iptables.yml
-# NOTE: DISABLED FOR THE MOMENT [11/30/2018]
 - include: prepare-kube_config.yml
 - include: prepare-swap.yml
 - include: prepare-ntpd.yml
-  when: ntp_setup | default (True)
+  when: boss__kubernetes__kubeadm__ntp_setup | default (True)
 - include: prepare-various.yml
 - include: prepare-completion.yml
 

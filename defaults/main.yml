@@ -99,6 +99,10 @@ boss__kubernetes__kubeadm__nfs_exports:
     export: "*(fsid=0,rw,async,no_root_squash,no_subtree_check,insecure)"
 
 
+boss__kubernetes__kubeadm__kernel_modules_setup: True
+boss__kubernetes__kubeadm__ntp_setup: True
+
+
 boss__kubernetes__kubeadm__master_node_name: master
 boss__kubernetes__kubeadm__docker_cgroup_driver: cgroupfs
 
