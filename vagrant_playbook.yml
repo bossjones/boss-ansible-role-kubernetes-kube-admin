@@ -152,7 +152,7 @@
 # $ sudo apt install osquery
 
 ##############################################################################
-# bootstrap common roles
+# SERVERS: bootstrap common roles
 ##############################################################################
 - hosts: servers
   gather_facts: True
@@ -177,7 +177,7 @@
       warn: no
 
 ##############################################################################
-# bootstrap debug role and update hosts
+# SERVERS: bootstrap debug role and update hosts across entire cluster
 ##############################################################################
 - hosts: servers
   gather_facts: True
@@ -201,7 +201,7 @@
       warn: no
 
 ##############################################################################
-# (servers) - Install and configure ntp
+# SERVERS: Install and configure ntp
 ##############################################################################
 - hosts: servers
   name: (servers) - Install and configure ntp
