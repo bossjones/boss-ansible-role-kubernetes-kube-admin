@@ -1,0 +1,33 @@
+[master]
+k8s-master.scarlettlab.home
+[node]
+k8s-01.scarlettlab.home
+
+# Use FullyQualifiedDomainNames (FQDN) (e.g. machine1.corp.example.com)
+[primary-master]
+k8s-master.scarlettlab.home
+
+[secondary-masters]
+# If there is only one master, make this section empty
+# master[2:3].corp.example.com
+
+[masters:children]
+primary-master
+secondary-masters
+
+[primary-etcd:children]
+primary-master
+
+[secondary-etcds:children]
+secondary-masters
+
+[etcd:children]
+primary-etcd
+secondary-etcds
+
+[nodes]
+# If there is only one machine both master and node, make this section empty
+k8s-01.scarlettlab.home
+
+[node:children]
+nodes

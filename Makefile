@@ -185,3 +185,9 @@ yamllint-role:
 
 install-ip-cmd-osx:
 	brew install iproute2mac
+
+flush-cache:
+	@sudo killall -HUP mDNSResponder
+
+bridge-up:
+	./vagrant_bridged_demo.sh --full --bridged_adapter auto
