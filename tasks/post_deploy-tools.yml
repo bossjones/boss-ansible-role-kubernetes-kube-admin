@@ -24,18 +24,18 @@
 #       executable: /bin/bash
 
 - name: Download etcd
-  get_url: url=https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}.tar.gz
-           dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}.tar.gz
+  get_url: url=https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
+           dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
            sha256sum={{ boss__kubernetes__kubeadm__etcd_checksum }}
 
 - name: Unarchive etcd
   unarchive: copy=no
-             src={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}.tar.gz
+             src={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
              dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}
-             creates="{{ etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}/etcd"
+             creates="{{ etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/etcd"
 
 - name: Copy binaries from archive into etcd dir
-  synchronize: src="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}/{{ item }}"
+  synchronize: src="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/{{ item }}"
                dest="{{ boss__kubernetes__kubeadm__etcd_dir }}"
                archive=True
   delegate_to: "{{ inventory_hostname }}"

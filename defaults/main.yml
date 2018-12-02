@@ -163,4 +163,7 @@ boss__kubernetes__kubeadm__etcd_dir: /usr/local/bin
 # etcd_download_filename: "{{ etcd_release }}.tar.gz"
 
 
-boss__kubernetes__kubeadm__etcd_download_url: "https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}.tar.gz"
+# https://github.com/etcd-io/etcd/releases/download/v3.2.25/etcd-v3.2.25-linux-arm64.tar.gz
+
+
+boss__kubernetes__kubeadm__etcd_download_url: "https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz"
