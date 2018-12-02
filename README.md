@@ -329,3 +329,14 @@ nvm use stable; npm install npm@latest -g;
 npm install -g docker-loghose;
 npm install -g docker-enter;
 ```
+
+
+# dnsmasq wildcard domain OSX
+
+edit /usr/local/etc/dnsmasq.conf
+
+https://qiita.com/bmj0114/items/9c24d863bcab1a634503
+
+use ip of the master
+
+see more here: https://github.com/ReSearchITEng/kubeadm-playbook

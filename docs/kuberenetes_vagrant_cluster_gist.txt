@@ -1,0 +1,177 @@
+# SOURCE: https://gist.github.com/walidshaari/02dfa17fffc9ac93cd47545d427ed76a
+
+Completion
+install bash-completion package
+
+kubeadm completion bash|tee /etc/bash_completion.d/kubeadm
+kubectl completion bash|tee /etc/bash_completion.d/kubectl
+
+Bootstrapping the master node "Kubernetes control panel" :
+
+kubeadm init --apiserver-advertise-address=192.168.205.10 --pod-network-cidr=10.244.0.0/16 --kubernetes-version=v1.6.2
+## for calico default is 192.168.0.0/16 for flannel it is 10.244.0.0/16, not sure what needs to be done to vagrant for ips not clash
+
+Ensure that the kubelet was configured to use CNI network plugins:
+In Ubuntu 16.04 systemd unit file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf you see it set
+
+Environment="KUBELET_NETWORK_ARGS=--network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
+
+Deploying Calico on an RBAC enabled cluster, first apply the ClusterRole and ClusterRoleBinding specs:
+root@master:~# kubectl apply -f https://docs.projectcalico.org/v2.5/getting-started/kubernetes/installation/rbac.yaml
+clusterrole "calico-policy-controller" created
+clusterrolebinding "calico-policy-controller" created
+clusterrole "calico-node" created
+clusterrolebinding "calico-node" created
+
+Install Calico
+
+root@master:~# curl -LO https://docs.projectcalico.org/v2.5/getting-started/kubernetes/installation/hosted/calico.yaml
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 10750  100 10750    0     0   2738      0  0:00:03  0:00:03 --:--:--  2738
+
+Reivew the Specs, and make changes if neccessary
+
+root@master:~# vim calico.yaml
+
+root@master:~# kubectl apply -f calico.yaml
+configmap "calico-config" created
+secret "calico-etcd-secrets" created
+daemonset "calico-node" created
+deployment "calico-policy-controller" created
+serviceaccount "calico-policy-controller" created
+serviceaccount "calico-node" created
+
+Install Dashboard:
+curl -sSL https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml|kubectl apply -f -
+
+
+for cluster dashboard to appear as part of "kubectl cluster-info"
+kubectl label svc kubernetes-dashboard -n kube-system kubernetes.io/cluster-service=true kubernetes.io/name=k8s-dashboard
+service "kubernetes-dashboard" labeled
+
+wal@Bei:$ kubectl cluster-info
+Kubernetes master is running at https://kubernetes.default.svc.cluster.local:6443
+KubeDNS is running at https://kubernetes.default.svc.cluster.local:6443/api/v1/namespaces/kube-system/services/kube-dns/proxy
+k8s-dashboard is running at https://kubernetes.default.svc.cluster.local:6443/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy
+
+Install heapster for monitoring as well HPA Horizontal Pod Autoscaling.
+
+git clone https://github.com/kubernetes/heapster
+cd heapster
+kubectl create -f deploy/kube-config/influxdb/
+kubectl create -f deploy/kube-config/rbac/heapster-rbac.yaml
+kubectl cluster-info
+kubectl get pods -n kube-system
+wal@Bei:~$ kubectl get svc -n kube-system
+NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE
+heapster               10.104.218.87    <none>        80/TCP          13m
+kube-dns               10.96.0.10       <none>        53/UDP,53/TCP   20h
+kubernetes-dashboard   10.102.206.76    <none>        80/TCP          19h
+monitoring-grafana     10.110.8.226     <none>        80/TCP          13m
+monitoring-influxdb    10.103.243.167   <none>        8086/TCP        13m
+
+kubectl top node
+kubectl top pod --all-namespaces
+
+wal@Bei:~/code/gitrepos/docker-k8s-lab/lab/k8s/multi-node/vagrant/kunr$ kubectl cluster-info
+Kubernetes master is running at https://kubernetes.default.svc.cluster.local:6443
+KubeDNS is running at https://kubernetes.default.svc.cluster.local:6443/api/v1/namespaces/kube-system/services/kube-dns/proxy
+k8s-dashboard is running at https://kubernetes.default.svc.cluster.local:6443/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy
+
+
+Cluster Health
+etcd:
+  root@master:~# /var/lib/docker/aufs/mnt/2975200ced98f0d9efa74e9cdff0c416589e0e41883c0b1685ee42f369ae8b39/usr/local/bin/etcdctl cluster-health
+  member 8e9e05c52164694d is healthy: got healthy result from http://127.0.0.1:2379
+  cluster is healthy
+
+Nodes
+
+Pods
+
+Components:
+
+from Master host:
+root@master:~# kubectl get  componentstatus
+NAME                 STATUS    MESSAGE              ERROR
+controller-manager   Healthy   ok
+scheduler            Healthy   ok
+etcd-0               Healthy   {"health": "true"}
+
+from worker node:
+
+Test application End to End testing:
+
+create project "namespace"
+kubectl create ns chapter7
+
+
+ kubectl run alpaca-prod --image=gcr.io/kuar-demo/kuard-amd64:1 --replicas=3 --port=8080 --labels="ver=1,app=alpaca,env=prod" -n chapter7
+ kubectl run bandicoot-prod--image=gcr.io/kuar-demo/kuard-amd64:2 --replicas=2  --port=8080 --labels="ver=2,app=bandicoot,env=prod" -n chapter7
+ kubectl expose deployment bandicot-prod -n chapter7
+ kubectl expose deployment bandicoot-prod -n chapter7
+ kubectl get all  -n chapter7
+
+ kubectl expose deployment bandicoot-prod --type NodePort -n chapter7
+ kubectl expose deployment alpaca-prod --type NodePort -n chapter7
+
+
+Delete project "namespace"
+
+Troubleshooting:
+CNI network
+Flannel:
+Calico:
+
+
+
+Delete cluster nodes:
+
+ kubectl drain --force --ignore-daemonsets --delete-local-data worker1
+ kubectl drain --force --ignore-daemonsets --delete-local-data worker2
+
+ then run kubectl reset on each node (worker1, and worker2)
+
+
+
+root@worker1:~# kubeadm reset
+[preflight] Running pre-flight checks
+[reset] Stopping the kubelet service
+[reset] Unmounting mounted directories in "/var/lib/kubelet"
+[reset] Removing kubernetes-managed containers
+[reset] No etcd manifest found in "/etc/kubernetes/manifests/etcd.yaml", assuming external etcd.
+[reset] Deleting contents of stateful directories: [/var/lib/kubelet /etc/cni/net.d /var/lib/dockershim]
+[reset] Deleting contents of config directories: [/etc/kubernetes/manifests /etc/kubernetes/pki]
+[reset] Deleting files: [/etc/kubernetes/admin.conf /etc/kubernetes/kubelet.conf /etc/kubernetes/controller-manager.conf /etc/kubernetes/scheduler.conf]
+
+root@worker2:~# kubeadm reset
+[preflight] Running pre-flight checks
+[reset] Stopping the kubelet service
+[reset] Unmounting mounted directories in "/var/lib/kubelet"
+[reset] Removing kubernetes-managed containers
+[reset] No etcd manifest found in "/etc/kubernetes/manifests/etcd.yaml", assuming external etcd.
+[reset] Deleting contents of stateful directories: [/var/lib/kubelet /etc/cni/net.d /var/lib/dockershim]
+[reset] Deleting contents of config directories: [/etc/kubernetes/manifests /etc/kubernetes/pki]
+[reset] Deleting files: [/etc/kubernetes/admin.conf /etc/kubernetes/kubelet.conf /etc/kubernetes/controller-manager.conf /etc/kubernetes/scheduler.conf]
+
+Manual Scheduling of pod:
+
+if you require a pod to start on a specific node, you can specify this in POD spec.nodeName, that is what DaemonSets do.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: kuard
+    version: "2"
+  name: kuard-manual
+  namespace: default
+spec:
+  nodeName: worker2
+  containers:
+  - image: gcr.io/kuar-demo/kuard-amd64:2
+    imagePullPolicy: IfNotPresent
+    name: kuard
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always

@@ -1,0 +1,238 @@
+---
+
+- set_fact:
+    # env_kc: '{{ proxy_env |default({}) | combine ({"PATH" : "/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin"  }) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+    env_kc: '{{ proxy_env |default({}) | combine ({"PATH" : "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"  }) | combine ({"KUBECONFIG" :"/etc/kubernetes/admin.conf"}) }}'
+  tags:
+  - always
+
+- block:
+  - name: 'Download {{ helm.install_script_url | default ("https://github.com/kubernetes/helm/raw/master/scripts/get") }}'
+    #environment: '{{ proxy_env | default ({}) }}'
+    environment: '{{env_kc}}'
+    get_url: url={{ helm.install_script_url | default ("https://github.com/kubernetes/helm/raw/master/scripts/get") }} dest=/tmp/helm_install_script force=yes mode="0755"
+    when: helm is defined
+    tags:
+    - helm
+
+  - name: 'Download "https://github.com/kubernetes/helm/raw/master/scripts/get" '
+    environment: '{{ proxy_env | default ({}) }}'
+    get_url: url="https://github.com/kubernetes/helm/raw/master/scripts/get" dest=/tmp/helm_install_script force=yes mode="0755"
+    when: helm is not defined
+    tags:
+    - helm
+
+  - name: Run /tmp/helm_install_script
+    environment: '{{env_kc}}'
+    shell: "/tmp/helm_install_script --version {{helm.helm_version | default ('latest')}}"
+    register: command_result
+    changed_when: '"is up-to-date" not in command_result.stdout'
+    when: helm is defined
+    args:
+      chdir: /tmp/
+    tags:
+    - helm
+
+  - name: Run /tmp/helm_install_script
+    environment: '{{env_kc}}'
+    shell: "/tmp/helm_install_script --version latest "
+    register: command_result
+    changed_when: '"is up-to-date" not in command_result.stdout'
+    when: helm is not defined
+    args:
+      chdir: /tmp/
+    tags:
+    - helm
+
+  - name: helm completion shell
+    environment: '{{env_kc}}'
+    shell: helm completion {{ shell | default ('bash') }} > ~/.kube/helm_completion.bash.inc
+    args:
+      warn: no
+    tags:
+    - helm
+
+  - name: helm completion to ~/.bash_profile
+    lineinfile:
+      dest: ~/.bash_profile
+      line: '[[ -x ${HOME}/.kube/helm_completion.bash.inc ]] && source ${HOME}/.kube/helm_completion.bash.inc'
+      state: present
+    when: shell is undefined or shell == 'bash'
+    tags:
+    - helm
+
+  # - name: helm remove/cleanup
+  #   environment: '{{env_kc}}'
+  #   shell: ( helm reset || true ) && ( kubectl delete deployment --namespace=kube-system tiller-deploy || true ) && ( kubectl delete service --namespace=kube-system tiller-deploy  || true ) && (  kubectl delete clusterrolebinding tiller  || true ) && (  kubectl delete --namespace=kube-system sa tiller )
+  #   tags:
+  #   - helm_reset
+  #   - helm
+  #   ignore_errors: yes
+
+  ## https://github.com/kubernetes/helm/blob/master/docs/rbac.md
+  - name: create helm related RBAC (tiller sa)
+    environment: '{{env_kc}}'
+    shell: kubectl --namespace=kube-system create sa tiller
+    tags:
+    - helm
+    - rbac
+
+  - name: create helm related RBAC (tiller clusterrolebinding)
+    environment: '{{env_kc}}'
+    shell: kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+    tags:
+    - helm
+    - rbac
+
+  - name: helm init when no MasterHA
+    environment: '{{env_kc}}'
+    #shell: "helm init --host {{ inventory_hostname }}:6443 "
+    shell: "helm init --host {{ groups['masters'][0] }}:{{ InitConfiguration.apiEndpoint.bindPort | default (6443) }} --service-account tiller"
+    #when: helm.install_script_url is defined
+    register: command_result
+    changed_when: "'Tiller is already installed' not in command_result.stdout"
+    args:
+      chdir: /root/
+    when:
+    - groups['masters'] | length == 1
+    tags:
+    - helm
+
+  - name: helm init with MasterHA and fqdn
+    environment: '{{env_kc}}'
+    #shell: "helm init --host {{ inventory_hostname }}:6443 "
+    shell: "env; echo $https_proxy; helm init --host {{ custom.networking.masterha_fqdn }}:{{ InitConfiguration.apiEndpoint.bindPort | default (6443) }} --service-account tiller"
+    #when: helm.install_script_url is defined
+    register: command_result
+    changed_when: "'Tiller is already installed' not in command_result.stdout"
+    args:
+      chdir: /root/
+    when:
+    - custom.networking.fqdn.always is not defined or custom.networking.fqdn.always or custom.networking.fqdn.master
+    - groups['masters'] | length > 1
+    tags:
+    - helm
+
+  - name: helm init with MasterHA with ip, not fqdn
+    environment: '{{env_kc}}'
+    #shell: "helm init --host {{ inventory_hostname }}:6443 "
+    shell: "helm init --host {{ custom.networking.masterha_fqdn }}:{{ InitConfiguration.apiEndpoint.bindPort | default (6443) }} --service-account tiller"
+    #when: helm.install_script_url is defined
+    register: command_result
+    changed_when: "'Tiller is already installed' not in command_result.stdout"
+    args:
+      chdir: /root/
+    when:
+    - not custom.networking.fqdn.always
+    - not custom.networking.fqdn.master
+    - groups['masters'] | length > 1
+    tags:
+    - helm
+
+  - name: helm sanity - wait for tiller pod to be running
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    shell: "kubectl get --namespace kube-system pods --no-headers | grep -w 'tiller-deploy' | grep -v -w 'Running' || true "
+    register: command_result
+    tags:
+    - helm_sanity
+    - sanity
+    - helm
+    until: command_result.stdout == ""
+    retries: 50
+    delay: 3
+
+  - name: create helm related RBAC (Patch Tiller s Deployment to use the new ServiceAccount)
+    environment: '{{env_kc}}'
+    shell: 'kubectl -n kube-system patch deploy/tiller-deploy -p ''{"spec": {"template": {"spec": {"serviceAccountName": "tiller"}}}}'''
+    register: command_result
+    changed_when: '"not patched" not in command_result.stdout'
+    ignore_errors: yes
+    tags:
+    - helm
+    - rbac
+
+  - name: Update helm Tiller
+    environment: '{{env_kc}}'
+    command: helm init --upgrade
+    when: helm is defined
+    tags:
+    - helm
+
+  - name: helm repo add
+    environment: '{{env_kc}}'
+    command: helm repo add {{ item.name }} {{ item.url }}
+    with_items:
+    - '{{ helm.repos | default("") }}'
+    when: helm is defined and helm.repos is defined
+    tags:
+    - helm
+
+  - name: helm repo update #Sometimes initial repo add corrupts the repo and update fixes it.
+    environment: '{{env_kc}}'
+    command: helm repo update
+    when: helm is defined
+    tags:
+    - helm
+
+  - name: Wait few seconds for tiller deployment to start
+    pause: seconds=3
+    tags:
+    - helm
+    changed_when: false
+
+  - name: helm sanity - wait for tiller pod to be running
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    shell: "kubectl get --namespace kube-system pods --no-headers | grep -w 'tiller-deploy' | grep -v -w 'Running' || true "
+    register: command_result
+    #failed_when: '"/" in command_result.stdout'
+    tags:
+    - helm_sanity
+    - sanity
+    - helm
+    until: command_result.stdout == ""
+    retries: 30
+    delay: 3
+    changed_when: false
+
+  - name: Wait few seconds to be 100% tiller deployment is up (the above is not enough)
+    pause: seconds=10
+    tags:
+    - helm
+    changed_when: false
+
+  - name: helm charts/packages deployment
+    environment: '{{env_kc}}'
+    command: 'helm install {{ item.repo }} --namespace {{ item.namespace | default("default") }} --name {{ item.name }} {{ item.options | default ("") }}'
+    with_items:
+    - "{{ helm.packages_list }}"
+    when: helm is defined and helm.packages_list is defined
+    tags:
+    - helm
+    - charts_deploy
+
+  - name: Wait few seconds for deployments to start
+    pause: seconds=3
+    tags:
+    - helm
+    - charts_deploy
+    changed_when: false
+
+  - name: helm full sanity - wait for all installed charts to become running
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    shell: "kubectl get --all-namespaces pods --no-headers | grep -v -w 'Running' || true "
+    register: command_result
+    tags:
+    - sanity_helm
+    - sanity
+    - helm
+    - charts_deploy
+    until: command_result.stdout == ""
+    retries: 60
+    delay: 3
+    changed_when: false
+  tags:
+  - helm
+

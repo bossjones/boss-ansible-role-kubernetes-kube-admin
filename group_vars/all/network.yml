@@ -1,11 +1,13 @@
 ## HA
 CLUSTER_NAME: demok8s  # used only for defining the clusterConfiguration and joinConfiguration k8s config, as well as the below dnsDomain and masterha_fqdn
 
+# NOTE: Bossjones here, not sure if this should be moved somewhere else or not, like defaults or something ... thinking out loud. 12/2/2018
+
 ## ensure you have the DNS set for wildcard, and pointing all the trafic to master or similar setup
 custom:
   networking:
-    dnsDomain: "{{ CLUSTER_NAME }}.myk8s.scarlettlab.home"  # For MasterHA, if you have dns, put the desired cluster domain here. If no DNS change possible on your side, and you want MasterHA, fix the below 2 values accordinly
-    masterha_fqdn: "master-{{ CLUSTER_NAME }}.scarlettlab.home"  # Important when you have MasterHA, in order to set apiServerCertSANs correctly
+    dnsDomain: "{{ CLUSTER_NAME }}.cloud.corp.bosslab.com"  # For MasterHA, if you have dns, put the desired cluster domain here. If no DNS change possible on your side, and you want MasterHA, fix the below 2 values accordinly
+    masterha_fqdn: "master-{{ CLUSTER_NAME }}.corp.bosslab.com"  # Important when you have MasterHA, in order to set apiServerCertSANs correctly
     masterha_vip: "10.1.2.3" #| default('') }}"  # Important when you have MasterHA
     fqdn: # decide where to force use fqdn for non masterha and nodes. When set to false, it will use the name as defined in the inventory file
       always: false # makes all the below true
@@ -72,7 +74,7 @@ k8s_network_addons_urls:
   # - https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 # OR
 ## Weave: #https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
- - https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&{{POD_NETWORK_CIDR | default ('env.IPALLOC_RANGE=10.32.0.0/12') }}
+#  - https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&{{POD_NETWORK_CIDR | default ('env.IPALLOC_RANGE=10.32.0.0/12') }}
  - "https://cloud.weave.works/k8s/net?k8s-version={{ClusterConfiguration.kubernetesVersion}}&env.IPALLOC_RANGE={{POD_NETWORK_CIDR | default ('10.32.0.0/12') }}"
 #####
 
