@@ -65,3 +65,10 @@ kube-scheduler – Schedules containers on hosts.
 kubelet – Processes a container manifest so the containers are launched according to how they are described.
 kube-proxy – Provides network proxy services.
 ```
+
+
+```
+root@master:/etc/default# cat /proc/5109/environ
+LANG=en_US.UTF-8PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/binKUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.confKUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yamlKUBELET_EXTRA_ARGS=KUBELET_KUBEADM_ARGS=--cgroup-driver=cgroupfs --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --network-plugin=cniroot@master:/etc/default#
+
+```
