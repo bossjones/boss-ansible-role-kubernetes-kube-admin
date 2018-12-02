@@ -35,3 +35,14 @@
 #   with_items:
 #     - true  # Run as root
 #     - false # Run as SSH user
+
+
+# TODO: create an alias that allows us to use this guy right here
+# - name: Determine etcd image ID being used by the etcd cluster
+#   shell: "docker ps | grep k8s_etcd | grep _kube-system_ | grep -v pause | awk '{print $2}' "
+#   register: etcd_image_id
+#   when: "'primary-etcd' in group_names"
+
+# - name: Check etcd cluster health on primary etcd node
+#   shell: "for i in 1 2 3 4 5 6 7 8 9 ; do docker run --rm --net host -v /etc/kubernetes:/etc/kubernetes {{ etcd_image_id.stdout }} etcdctl --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --ca-file /etc/kubernetes/pki/etcd/ca.crt --endpoints https://{{ ansible_default_ipv4.address }}:2379 cluster-health && exit 0; sleep 5s; done; /bin/false"
+#   when: "'primary-etcd' in group_names"
