@@ -1,0 +1,30 @@
+# THIS IS WHAT IS CURRENTLY BEING SET
+
+# root@master:/etc/default# cat /proc/5109/environ
+
+# LANG=en_US.UTF-8
+# PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf
+# KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml
+# KUBELET_EXTRA_ARGS=
+# KUBELET_KUBEADM_ARGS=--cgroup-driver=cgroupfs --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --network-plugin=cni
+
+# root@master:/etc/default#
+
+
+# Proposed based on https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/
+
+# Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+# Environment="KUBELET_SYSTEM_PODS_ARGS=--pod-manifest-path=/etc/kubernetes/manifests --allow-privileged=true"
+# Environment="KUBELET_NETWORK_ARGS=--network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
+# Environment="KUBELET_DNS_ARGS=--cluster-dns=10.96.0.10 --cluster-domain=cluster.local"
+# Environment="KUBELET_AUTHZ_ARGS=--authorization-mode=Webhook --client-ca-file=/etc/kubernetes/pki/ca.crt"
+# Environment="KUBELET_CADVISOR_ARGS="
+# Environment="KUBELET_CERTIFICATE_ARGS=--rotate-certificates=true --cert-dir=/var/lib/kubelet/pki"
+# ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_SYSTEM_PODS_ARGS $KUBELET_NETWORK_ARGS $KUBELET_DNS_ARGS $KUBELET_AUTHZ_ARGS $KUBELET_CADVISOR_ARGS $KUBELET_CERTIFICATE_ARGS $KUBELET_EXTRA_ARGS
+
+
+
+# # {{ansible_managed}}
+# [Service]
+# Environment="KUBELET_EXTRA_ARGS=--node-ip={{boss__kubernetes__kubeadm__master_node_ip}} --cgroup-driver={{boss__kubernetes__kubeadm__docker_cgroup_driver}}"
