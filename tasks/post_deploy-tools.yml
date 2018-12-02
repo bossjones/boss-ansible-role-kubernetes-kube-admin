@@ -5,24 +5,6 @@
   register: docker_cgroup_driver
   changed_when: false
 
-
-# etcd
-
-# curl -sSL \
-#   -O "https://github.com/coreos/etcd/releases/download/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz"
-
-# tar -xf "etcd-${etcd_version}-linux-amd64.tar.gz"
-
-
-#   - name: install ctop
-#     shell: |
-#       curl -L 'https://github.com/bcicen/ctop/releases/download/v0.7.1/ctop-0.7.1-linux-amd64' > /usr/local/bin/ctop
-#       chmod +x /usr/local/bin/ctop
-#     become: yes
-#     become_method: sudo
-#     args:
-#       executable: /bin/bash
-
 - name: Download etcd
   get_url: url=https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
            dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
@@ -32,7 +14,7 @@
   unarchive: copy=no
              src={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
              dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}
-             creates="{{ etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/etcd"
+             creates="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/etcd"
 
 - name: Copy binaries from archive into etcd dir
   synchronize: src="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/{{ item }}"
@@ -40,6 +22,4 @@
                archive=True
   delegate_to: "{{ inventory_hostname }}"
   with_items:
-    # - etcd
     - etcdctl
-#   when: not etcd_config_only|bool

@@ -155,7 +155,7 @@ boss__kubernetes__kubeadm__taints_master:
 
 
 boss__kubernetes__kubeadm__etcd_version: v3.2.18
-boss__kubernetes__kubeadm__etcd_checksum: 085c13764af02ca2762cbacade374583a532d4f75a7b996a62f67f8f044641e6
+boss__kubernetes__kubeadm__etcd_checksum: b729db0732448064271ea6fdcb901773c4fe917763ca07776f22d0e5e0bd4097
 boss__kubernetes__kubeadm__etcd_download_dir: /usr/local/src
 boss__kubernetes__kubeadm__etcd_dir: /usr/local/bin
 
