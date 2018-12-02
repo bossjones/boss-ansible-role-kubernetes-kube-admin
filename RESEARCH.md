@@ -6,6 +6,8 @@ Search: vagrant "cluster.local"
 
 * https://github.com/mattes/vagrant-dnsmasq/issues/21
 
+* https://github.com/futuware/kapellmeister/blob/3ac0a1bc857a919e718c7f7b728f0cff460e8849/Vagrantfile
+
 * [YO THIS IS THE ONE !!!!!!!!!! OpenShift / K8s : DNS Configuration Explained](http://www.ksingh.co.in/blog/2017/10/04/openshift-dns-configuration-explained/)
 
 * [wildcard DNS in localhost development dnsmasq dnsmasq_setup_osx](https://gist.github.com/eloypnd/5efc3b590e7c738630fdcf0c10b68072)
