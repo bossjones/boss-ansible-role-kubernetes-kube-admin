@@ -1,25 +1,37 @@
 ---
 
-- name: detect docker's cgroup-driver
-  shell: docker info 2>/dev/null |grep -i cgroup | cut -d":" -f2 | tr -d " "
-  register: docker_cgroup_driver
-  changed_when: false
+# - name: detect docker's cgroup-driver
+#   shell: docker info 2>/dev/null |grep -i cgroup | cut -d":" -f2 | tr -d " "
+#   register: docker_cgroup_driver
+#   changed_when: false
 
-- name: Download etcd
-  get_url: url=https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
-           dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
-           sha256sum={{ boss__kubernetes__kubeadm__etcd_checksum }}
+# - name: Download etcd
+#   get_url: url=https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
+#            dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
+#            sha256sum={{ boss__kubernetes__kubeadm__etcd_checksum }}
 
-- name: Unarchive etcd
-  unarchive: copy=no
-             src={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
-             dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}
-             creates="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/etcd"
+# - name: Unarchive etcd
+#   unarchive: copy=no
+#              src={{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}.tar.gz
+#              dest={{ boss__kubernetes__kubeadm__etcd_download_dir }}
+#              creates="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/etcd"
 
-- name: Copy binaries from archive into etcd dir
-  synchronize: src="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/{{ item }}"
-               dest="{{ boss__kubernetes__kubeadm__etcd_dir }}"
-               archive=True
-  delegate_to: "{{ inventory_hostname }}"
-  with_items:
-    - etcdctl
+# - name: Copy binaries from archive into etcd dir
+#   synchronize: src="{{ boss__kubernetes__kubeadm__etcd_download_dir }}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{sys_arch}}/{{ item }}"
+#                dest="{{ boss__kubernetes__kubeadm__etcd_dir }}"
+#                archive=True
+#   delegate_to: "{{ inventory_hostname }}"
+#   with_items:
+#     - etcdctl
+
+
+
+# - name: Add alias for etcdctl to bashrc
+#   lineinfile:
+#     path: '$HOME/.bashrc'
+#     line: 'source <(kubeadm completion bash)'
+#     create: yes
+#   become: '{{ item }}'
+#   with_items:
+#     - true  # Run as root
+#     - false # Run as SSH user
