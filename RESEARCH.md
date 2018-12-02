@@ -6,6 +6,8 @@ Search: vagrant "cluster.local"
 
 * [YO THIS IS THE ONE !!!!!!!!!! OpenShift / K8s : DNS Configuration Explained](http://www.ksingh.co.in/blog/2017/10/04/openshift-dns-configuration-explained/)
 
+* [wildcard DNS in localhost development dnsmasq dnsmasq_setup_osx](https://gist.github.com/eloypnd/5efc3b590e7c738630fdcf0c10b68072)
+
 * [How To Inspect Kubernetes Networking](https://www.digitalocean.com/community/tutorials/how-to-inspect-kubernetes-networking)
 
 * [Configure DNS Wildcard with Dnsmasq Service](https://qiita.com/bmj0114/items/9c24d863bcab1a634503)
