@@ -126,7 +126,8 @@ boss__kubernetes__kubeadm__k8s_network_addons_urls:
 
 
 # These are literally kubernetes addons, like dashboard, heapster, and more
-boss__kubernetes__kubeadm__k8s_addons_urls: []
+boss__kubernetes__kubeadm__k8s_addons_urls:
+- "https://github.com/kubernetes/kubernetes/raw/master/cluster/addons/node-problem-detector/npd.yaml"  # rbac ready
 
 #  kubeadm reset --force &&
 #  sysctl -p &&
@@ -151,3 +152,15 @@ boss__kubernetes__kubeadm__taints_master:
 #- 'dedicated:NoExecute-'                       # Puts the previous PreferNoSchedule into action - step1
 #- 'node-role.kubernetes.io/master:NoSchedule-' # Puts the previous PreferNoSchedule into action - step2
 #####
+
+
+boss__kubernetes__kubeadm__etcd_version: v3.2.18
+boss__kubernetes__kubeadm__etcd_checksum: 085c13764af02ca2762cbacade374583a532d4f75a7b996a62f67f8f044641e6
+boss__kubernetes__kubeadm__etcd_download_dir: /usr/local/src
+boss__kubernetes__kubeadm__etcd_dir: /usr/local/bin
+
+# etcd_release: "etcd-{{ boss__kubernetes__kubeadm__etcd_version }}-{{ etcd_platform }}-{{ etcd_arch }}"
+# etcd_download_filename: "{{ etcd_release }}.tar.gz"
+
+
+boss__kubernetes__kubeadm__etcd_download_url: "https://github.com/etcd-io/etcd/releases/download/{{boss__kubernetes__kubeadm__etcd_version}}/etcd-{{boss__kubernetes__kubeadm__etcd_version}}-linux-{{ansible_architecture}}.tar.gz"

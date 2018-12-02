@@ -11,7 +11,7 @@
 # https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
 - name: Copy weave net script
   environment: '{{ proxy_env | default ({}) }}'
-  get_url: url=https://raw.githubusercontent.com/weaveworks/weave/master/weave dest=/usr/local/bin/weave mode=u+rxw force=yes
+  get_url: url=https://raw.githubusercontent.com/weaveworks/weave/master/weave dest=/usr/local/bin/weave mode=0755 force=yes
   ignore_errors: yes  # Currently there is no way to check if the user is using weave
   tags:
   - weave
