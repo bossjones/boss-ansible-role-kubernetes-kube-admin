@@ -6,3 +6,6 @@ ansible/roles/darkedges.commonos/
 *.log
 .vagrant
 ssh_config*
+
+
+config-vbox

@@ -146,8 +146,8 @@ boss__kubernetes__kubeadm__k8s_addons_urls:
 
 boss__kubernetes__kubeadm__master_uncordon: True
 
-boss__kubernetes__kubeadm__taints_master:
-- 'node-role.kubernetes.io/master-'  # allow pods to run on master node
+# boss__kubernetes__kubeadm__taints_master:
+# - 'node-role.kubernetes.io/master-'  # allow pods to run on master node
 #taints_master:
 #- 'dedicated=master:NoExecute'                 # Force eviction of pods from master
 #- 'dedicated=master:PreferNoSchedule'          # Safety net
