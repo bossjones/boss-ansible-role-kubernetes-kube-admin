@@ -204,5 +204,8 @@ ping-bridge:
 run-bridge-ansible:
 	@ansible-playbook -i hosts vagrant_playbook.yml -v
 
+run-bridge-test-ansible:
+	@ansible-playbook -i hosts test.yml -v
+
 dummy-web-server:
 	python dummy-web-server.py
