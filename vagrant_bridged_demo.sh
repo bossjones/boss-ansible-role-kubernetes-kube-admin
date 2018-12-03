@@ -119,7 +119,7 @@ if [ "${ACTIONS}x" != "regenerate_configx" ];then
     #VBoxManage showvminfo $M | grep -i nic    #"--machinereadable"
     VBoxManage modifyvm $vboxMUUID --nic1 none --nic2 none --nic3 none --nic4 none --nic5 none --nic6 none --nic7 none --nic8 none 
     VBoxManage modifyvm $vboxMUUID --nic1 bridged --bridgeadapter1 $HOST_BRIDGED_INTERFACE --nictype1 virtio --macaddress1 auto
-    VBoxManage modifyvm $vboxMUUID --nic2 nat --nictype2 82540EM --macaddress2 auto --natnet2 "10.240.0.0/24" --natdnsproxy2 off --natdnshostresolver2 off # This is optional
+    # VBoxManage modifyvm $vboxMUUID --nic2 nat --nictype2 virtio --macaddress2 auto --natnet2 "10.240.0.0/24" --natdnsproxy2 off --natdnshostresolver2 off # This is optional
     # VBoxManage modifyvm $vboxMUUID --nic2 nat --nictype2 82540EM --macaddress2 auto --natnet2 "10.240.0.0/24" --natdnsproxy2 off --natdnshostresolver2 off # This is optional
     #VBoxManage modifyvm $vboxMUUID --nic1 bridged --bridgeadapter1 $HOST_BRIDGED_INTERFACE --nictype1 Am79C973 --macaddress1 auto
     #VBoxManage modifyvm $vboxMUUID --nic1 bridged --bridgeadapter1 $HOST_BRIDGED_INTERFACE --nictype1 virtio --macaddress1 auto
