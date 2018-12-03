@@ -86,7 +86,7 @@ boss__kubernetes__kubeadm__apt_cache_time: 86400
 # NOTE: Taken from vagrant-ansible-kubernetes
 boss__kubernetes__kubeadm__install_nfs: true
 
-boss__kubernetes__kubeadm__kubernetes_interface: eth0  # enp0s8 (if vagrant)
+boss__kubernetes__kubeadm__kubernetes_interface: eth0  # enp0s8 (if vagrant)  ... bridge - enp0s3
 boss__kubernetes__kubeadm__nfs_interface: "{{ boss__kubernetes__kubeadm__kubernetes_interface }}"
 
 # SOURCE: darkedges.nfs
@@ -106,7 +106,9 @@ boss__kubernetes__kubeadm__ntp_setup: True
 boss__kubernetes__kubeadm__master_node_name: master
 boss__kubernetes__kubeadm__docker_cgroup_driver: cgroupfs
 
+boss__kubernetes__kubeadm__master_network_interface: "{{ boss__kubernetes__kubeadm__kubernetes_interface }}"
 boss__kubernetes__kubeadm__master_node_ip: '192.168.50.101' # vagrant assigned IP address
+# boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239' # vagrant assigned IP address
 
 # boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list: We will use something like {{ boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list | join(' ') } to properly create the value:
 # Environment="KUBELET_EXTRA_ARGS=--node-ip=192.168.50.101 --cgroup-driver=cgroupfs"

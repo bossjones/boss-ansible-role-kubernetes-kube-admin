@@ -191,3 +191,18 @@ flush-cache:
 
 bridge-up:
 	./vagrant_bridged_demo.sh --full --bridged_adapter auto
+
+ssh-bridge-master:
+	ssh -F ./ssh_config k8s-master-01.scarlettlab.home
+
+ssh-bridge-worker:
+	ssh -F ./ssh_config k8s-worker-01.scarlettlab.home
+
+ping-bridge:
+	@ansible-playbook -v -i hosts ping.yml
+
+run-bridge-ansible:
+	@ansible-playbook -i hosts vagrant_playbook.yml -v
+
+dummy-web-server:
+	python dummy-web-server.py
