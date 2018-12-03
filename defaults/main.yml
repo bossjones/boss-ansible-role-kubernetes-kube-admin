@@ -144,7 +144,7 @@ boss__kubernetes__kubeadm__k8s_addons_urls:
 ## It's useful if it's a single-machine Kubernetes cluster for development (replacing minikube)
 ## To see taints, use: kubectl describe nodes
 
-boss__kubernetes__kubeadm__master_uncordon: True
+boss__kubernetes__kubeadm__master_uncordon: False
 
 # boss__kubernetes__kubeadm__taints_master:
 # - 'node-role.kubernetes.io/master-'  # allow pods to run on master node
