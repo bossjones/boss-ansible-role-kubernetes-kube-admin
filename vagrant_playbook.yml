@@ -103,6 +103,8 @@
     register: sysdig_result
     failed_when: false
     changed_when: false
+    tags:
+      - slow
 
   - name: "SYSDIG: curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash ONLY if it is not installed already"
     shell: |
@@ -110,6 +112,8 @@
     args:
       executable: /bin/bash
     when: not sysdig_result.stat.exists
+    tags:
+      - slow
 
   - name: check if /usr/local/bin/cargo exists
     stat:
@@ -117,6 +121,8 @@
     register: cargo_result
     failed_when: false
     changed_when: false
+    tags:
+      - slow
 
   - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh ONLY if it is not installed already"
     shell: |
@@ -124,6 +130,8 @@
     args:
       executable: /bin/bash
     when: not cargo_result.stat.exists
+    tags:
+      - slow
 
   - name: install ctop
     shell: |
@@ -164,6 +172,7 @@
     - bootstrap
     - servers
     - common
+    - slow
   roles:
     - role: boss-ansible-role-bootstrap
     - role: boss-ansible-role-core
@@ -190,6 +199,7 @@
     - servers
   roles:
     - role: boss-ansible-role-debug
+      boss__debug__dump_type: 'seperate'
     # - role: boss-ansible-role-update-hosts
     #   boss__update__hosts__hosts_file: /etc/hosts
     #   boss__update__hosts__ansible_group: "servers"
@@ -229,7 +239,7 @@
       tags: [ 'worker', 'install', 'worker_install', 'ntp']
       task: prepare-ntpd
       boss__ntp__timezone: 'America/New_York'
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
+      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
 
 ##############################################################################
@@ -277,7 +287,7 @@
       task: prepare
       boss__kubernetes__kubeadm__run_prepare: True
       boss__kubernetes__kubeadm__override_node_ip: True
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
+      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
 
 
@@ -327,7 +337,7 @@
       task: prepare
       boss__kubernetes__kubeadm__run_prepare: True
       boss__kubernetes__kubeadm__override_node_ip: True
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
+      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
 
 
@@ -338,6 +348,7 @@
   tags:
     - nvm
     - tools
+    - slow
   vars:
     bossjones__user: vagrant
     bossjones__group: vagrant
@@ -439,147 +450,147 @@
 # OKAY, WE ARE FINALLY READY TO CONFIGURE KUBERNETES. STARTING WITH THE MASTER.
 #########################################################################################################################################
 
-#############################################################################
-# Run kubeadm init and start up master
-#############################################################################
-- hosts: primary-master
-  name: (primary-master) - Run kubeadm init and start up master
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  environment:
-    DEBIAN_FRONTEND: noninteractive
-  vars:
-    # hosts_file: /etc/hosts.molecule
-    boss__docker__version: "18.06"
-    # NOTE: Getting rid of debug flag, too noisey
-    boss__docker__daemon_flags:
-    - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
+# #############################################################################
+# # Run kubeadm init and start up master
+# #############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - Run kubeadm init and start up master
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     # NOTE: Getting rid of debug flag, too noisey
+#     boss__docker__daemon_flags:
+#     - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
 
-    boss__docker__users: ["vagrant"]
-    boss__ntp__timezone: 'America/New_York'
-  tags:
-    - docker
-    - docker-provision
-    - master
-    - install
-    - master_install
-    - ha
-    - primary_master
-    - kubeadm_init
-  roles:
-    # role: boss-ansible-role-kubernetes-kubeadm
-    - role: ../
-      boss__kubernetes__kubeadm__install_method: "pkg"
-      tags: [ 'primary-master', 'master', 'install', 'master_install', 'kubeadm_init']
-      task: master
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
-      boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
-
-
-
-##############################################################################
-# MASTER: Now that the master is up and running, let's deploy weave-net to it
-##############################################################################
-- hosts: primary-master
-  name: (primary-master) - deploy weave-net and other post_deploy tasks
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  environment:
-    DEBIAN_FRONTEND: noninteractive
-  vars:
-    # hosts_file: /etc/hosts.molecule
-    boss__docker__version: "18.06"
-    # NOTE: Getting rid of debug flag, too noisey
-    boss__docker__daemon_flags:
-    - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
-
-    boss__docker__users: ["vagrant"]
-    boss__ntp__timezone: 'America/New_York'
-  tags:
-    - docker
-    - docker-provision
-    - master
-    - install
-    - master_install
-    - ha
-    - primary_master
-    - post_deploy
-  roles:
-    # role: boss-ansible-role-kubernetes-kubeadm
-    - role: ../
-      boss__kubernetes__kubeadm__install_method: "pkg"
-      tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
-      task: post_deploy
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
-      boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - kubeadm_init
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'kubeadm_init']
+#       task: master
+#       boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
+#       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
 
 
 
+# ##############################################################################
+# # MASTER: Now that the master is up and running, let's deploy weave-net to it
+# ##############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - deploy weave-net and other post_deploy tasks
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     # NOTE: Getting rid of debug flag, too noisey
+#     boss__docker__daemon_flags:
+#     - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
 
-##############################################################################
-# WORKERS/NODES: Join cluster!
-##############################################################################
-- hosts: kubernetes-nodes
-  name: (kubernetes-nodes) - make workers join kubernetes cluster
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  environment:
-    DEBIAN_FRONTEND: noninteractive
-  tags:
-    - docker
-    - docker-provision
-    - worker
-    - install
-    - worker_install
-    - ha
-    - node_join
-    - worker_join
-  roles:
-    # role: boss-ansible-role-kubernetes-kubeadm
-    - role: ../
-      tags: [ 'primary-worker', 'worker', 'install', 'worker_install', 'node_join']
-      task: nodes
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
-      boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - post_deploy
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
+#       task: post_deploy
+#       boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
+#       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
 
 
 
-##############################################################################
-# MASTER: install etcdctl
-##############################################################################
-- hosts: primary-master
-  name: (primary-master) - install etcdctl
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  environment:
-    DEBIAN_FRONTEND: noninteractive
-  vars:
-    # hosts_file: /etc/hosts.molecule
-    boss__docker__version: "18.06"
-    # NOTE: Getting rid of debug flag, too noisey
-    boss__docker__daemon_flags:
-    - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
 
-    boss__docker__users: ["vagrant"]
-    boss__ntp__timezone: 'America/New_York'
-  tags:
-    - docker
-    - docker-provision
-    - master
-    - install
-    - master_install
-    - ha
-    - primary_master
-    - post_deploy
-  roles:
-    # role: boss-ansible-role-kubernetes-kubeadm
-    - role: ../
-      boss__kubernetes__kubeadm__install_method: "pkg"
-      tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
-      task: post_deploy-tools
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
-      boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
+# ##############################################################################
+# # WORKERS/NODES: Join cluster!
+# ##############################################################################
+# - hosts: kubernetes-nodes
+#   name: (kubernetes-nodes) - make workers join kubernetes cluster
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   tags:
+#     - docker
+#     - docker-provision
+#     - worker
+#     - install
+#     - worker_install
+#     - ha
+#     - node_join
+#     - worker_join
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       tags: [ 'primary-worker', 'worker', 'install', 'worker_install', 'node_join']
+#       task: nodes
+#       boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
+#       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
+
+
+
+# ##############################################################################
+# # MASTER: install etcdctl
+# ##############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - install etcdctl
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     # NOTE: Getting rid of debug flag, too noisey
+#     boss__docker__daemon_flags:
+#     - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
+
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - post_deploy
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
+#       task: post_deploy-tools
+#       boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
+#       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'

@@ -51,7 +51,7 @@
       tags: [ 'master', 'install', 'master_install', 'master_lookup']
       task: facts
       boss__ntp__timezone: 'America/New_York'
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239'
+      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
     - role: boss-ansible-role-debug
 

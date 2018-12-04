@@ -192,6 +192,9 @@ flush-cache:
 bridge-up:
 	./vagrant_bridged_demo.sh --full --bridged_adapter auto
 
+bridge-restart:
+	./vagrant_bridged_demo.sh --restart
+
 ssh-bridge-master:
 	ssh -F ./ssh_config k8s-master-01.scarlettlab.home
 
@@ -206,6 +209,9 @@ run-bridge-ansible:
 
 run-bridge-test-ansible:
 	@ansible-playbook -i hosts test.yml -v
+
+run-bridge-ansible-no-slow:
+	@ansible-playbook -i hosts vagrant_playbook.yml -v --skip-tags "slow"
 
 dummy-web-server:
 	python dummy-web-server.py

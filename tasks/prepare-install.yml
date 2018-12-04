@@ -167,3 +167,11 @@
   #- docker.io # for ubuntu
 
 
+- name: add node-ip.sh script
+  copy: src=node-ip.sh dest=/usr/local/bin/node-ip.sh owner=root group=root mode=755
+  tags:
+  - kubeadm
+  - kubelet
+
+
+# kube-tools

@@ -106,7 +106,7 @@ boss__kubernetes__kubeadm__docker_cgroup_driver: cgroupfs
 
 boss__kubernetes__kubeadm__master_network_interface: "{{ boss__kubernetes__kubeadm__kubernetes_interface }}"
 # boss__kubernetes__kubeadm__master_node_ip: '192.168.50.101' # vagrant assigned IP address
-boss__kubernetes__kubeadm__master_node_ip: '192.168.1.239' # vagrant assigned IP address
+boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241' # vagrant assigned IP address
 
 # boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list: We will use something like {{ boss__kubernetes__kubeadm__env_KUBELET_EXTRA_ARGS_list | join(' ') } to properly create the value:
 # Environment="KUBELET_EXTRA_ARGS=--node-ip=192.168.50.101 --cgroup-driver=cgroupfs"

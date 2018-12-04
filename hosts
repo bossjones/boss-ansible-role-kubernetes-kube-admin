@@ -1,7 +1,7 @@
 [master]
 k8s-master-01.scarlettlab.home
 [node]
-k8s-worker-01.scarlettlab.home
+k8s-01.scarlettlab.home
 
 
 # Use FullyQualifiedDomainNames (FQDN) (e.g. machine1.corp.example.com)

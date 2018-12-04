@@ -44,6 +44,10 @@ Vagrant.configure(2) do |config|
 
   config.dnsmasq.disable = true
 
+  # set auto_update to false, if you do NOT want to check the correct
+  # additions version when booting this machine
+  config.vbguest.auto_update = false
+
   # config.vm.box_check_update = "false"  # If there is no internet access to get new updates
 
   # config.vm.network "public_network", type: "dhcp", bridge: "enp3s0"
