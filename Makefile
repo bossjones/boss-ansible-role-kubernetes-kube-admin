@@ -215,3 +215,20 @@ run-bridge-ansible-no-slow:
 
 dummy-web-server:
 	python dummy-web-server.py
+
+busybox-pod:
+	kubectl run -it --rm --restart=Never busybox --image=busybox sh
+
+nvm-install:
+	nvm install stable ;
+	nvm use stable ; 
+	npm install npm@latest -g ;
+	npm install -g docker-loghose ;
+	npm install -g docker-enter ;
+
+hostnames-pod:
+	kubectl run hostnames --image=k8s.gcr.io/serve_hostname \
+	--labels=app=hostnames \
+    --port=9376 \
+    --replicas=3 ; \
+	kubectl get pods -l app=hostnames ; \
