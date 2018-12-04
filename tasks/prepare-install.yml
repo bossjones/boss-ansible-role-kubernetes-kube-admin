@@ -174,4 +174,20 @@
   - kubelet
 
 
+- name: '/etc/profile.d'
+  file:
+    path: "/etc/profile.d"
+    state: directory
+
+- name: add docker-aliases.sh script
+  copy: 
+    src: docker-aliases.sh 
+    dest: /etc/profile.d/docker-aliases.sh 
+    owner: root 
+    group: root 
+    mode: 755
+  tags:
+  - kubeadm
+  - kubelet
+
 # kube-tools
