@@ -242,7 +242,8 @@
 # Simplistic interactive filtering tool
 - name: install peco
   shell: |
-    tar xvf https://github.com/peco/peco/releases/download/v0.5.3/peco_linux_amd64.tar.gz ;
+    wget https://github.com/peco/peco/releases/download/v0.5.3/peco_linux_amd64.tar.gz ;
+    tar xvf peco_linux_amd64.tar.gz ;
     mv peco_linux_amd64/peco /usr/local/bin/peco ;
     chmod +x /usr/local/bin/peco ;
   become: yes
@@ -250,6 +251,35 @@
   args:
     executable: /bin/bash
     creates: /usr/local/bin/peco
+
+# https://github.com/pulumi/kubespy/releases/download/v0.4.0/kubespy-linux-amd64.tar.gz
+
+# kubespy - Tools for observing Kubernetes resources in real time, powered by Pulumi
+- name: install kubespy - Tools for observing Kubernetes resources in real time, powered by Pulumi
+  shell: |
+    wget https://github.com/pulumi/kubespy/releases/download/v0.4.0/kubespy-linux-amd64.tar.gz ;
+    tar xvf kubespy-linux-amd64.tar.gz ;
+    mv releases/kubespy-linux-amd64/kubespy /usr/local/bin/kubespy ;
+    chmod +x /usr/local/bin/kubespy ;
+  become: yes
+  become_method: sudo
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/kubespy
+
+# kubetail
+- name: install kubetail
+  shell: |
+    curl -L 'https://raw.githubusercontent.com/johanhaleby/kubetail/master/kubetail' > /usr/local/bin/kubetail ;
+    chmod +x /usr/local/bin/kubetail ;
+    curl -L 'https://raw.githubusercontent.com/johanhaleby/kubetail/master/completion/kubetail.bash' > /etc/bash_completion.d/kubetail ;
+  become: yes
+  become_method: sudo
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/kubetail
+
+# https://raw.githubusercontent.com/johanhaleby/kubetail/master/kubetail
 
 # https://github.com/peco/peco/releases/download/v0.5.3/peco_linux_amd64.tar.gz
 
