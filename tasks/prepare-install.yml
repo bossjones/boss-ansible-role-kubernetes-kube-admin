@@ -168,10 +168,22 @@
 
 
 - name: add node-ip.sh script
-  copy: src=node-ip.sh dest=/usr/local/bin/node-ip.sh owner=root group=root mode=755
+  copy: 
+    src: node-ip.sh 
+    dest: /usr/local/bin/node-ip.sh 
+    owner: root 
+    group: root 
+    mode: 755
   tags:
   - kubeadm
   - kubelet
+
+
+# - name: Create kubeadm sysctl file
+#   copy: src=90-kubeadm.conf dest=/etc/sysctl.d/90-kubeadm.conf
+#   tags:
+#   - kubeadm
+#   - kubelet
 
 
 - name: '/etc/profile.d'

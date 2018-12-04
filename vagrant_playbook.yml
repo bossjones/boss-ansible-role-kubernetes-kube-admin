@@ -235,6 +235,7 @@
     - worker_install
     - ha
     - ntp
+    - slow
 
   roles:
     - role: ../
@@ -491,42 +492,42 @@
 
 
 
-##############################################################################
-# MASTER: Now that the master is up and running, let's deploy weave-net to it
-##############################################################################
-- hosts: primary-master
-  name: (primary-master) - deploy weave-net and other post_deploy tasks
-  gather_facts: True
-  become: yes
-  become_method: sudo
-  environment:
-    DEBIAN_FRONTEND: noninteractive
-  vars:
-    # hosts_file: /etc/hosts.molecule
-    boss__docker__version: "18.06"
-    # NOTE: Getting rid of debug flag, too noisey
-    boss__docker__daemon_flags:
-    - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
+# ##############################################################################
+# # MASTER: Now that the master is up and running, let's deploy weave-net to it
+# ##############################################################################
+# - hosts: primary-master
+#   name: (primary-master) - deploy weave-net and other post_deploy tasks
+#   gather_facts: True
+#   become: yes
+#   become_method: sudo
+#   environment:
+#     DEBIAN_FRONTEND: noninteractive
+#   vars:
+#     # hosts_file: /etc/hosts.molecule
+#     boss__docker__version: "18.06"
+#     # NOTE: Getting rid of debug flag, too noisey
+#     boss__docker__daemon_flags:
+#     - "-H 0.0.0.0:2375 -H unix:///var/run/docker.sock $DOCKER_DAEMON_ARGS"
 
-    boss__docker__users: ["vagrant"]
-    boss__ntp__timezone: 'America/New_York'
-  tags:
-    - docker
-    - docker-provision
-    - master
-    - install
-    - master_install
-    - ha
-    - primary_master
-    - post_deploy
-  roles:
-    # role: boss-ansible-role-kubernetes-kubeadm
-    - role: ../
-      boss__kubernetes__kubeadm__install_method: "pkg"
-      tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
-      task: post_deploy
-      boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
-      boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
+#     boss__docker__users: ["vagrant"]
+#     boss__ntp__timezone: 'America/New_York'
+#   tags:
+#     - docker
+#     - docker-provision
+#     - master
+#     - install
+#     - master_install
+#     - ha
+#     - primary_master
+#     - post_deploy
+#   roles:
+#     # role: boss-ansible-role-kubernetes-kubeadm
+#     - role: ../
+#       boss__kubernetes__kubeadm__install_method: "pkg"
+#       tags: [ 'primary-master', 'master', 'install', 'master_install', 'post_deploy']
+#       task: post_deploy
+#       boss__kubernetes__kubeadm__master_node_ip: '192.168.1.241'
+#       boss__kubernetes__kubeadm__kubernetes_interface: 'enp0s3'
 
 
 
