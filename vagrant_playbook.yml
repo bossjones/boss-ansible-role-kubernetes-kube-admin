@@ -125,14 +125,14 @@
     tags:
       - slow
 
-  - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh ONLY if it is not installed already"
-    shell: |
-      bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
-    args:
-      executable: /bin/bash
-    when: not cargo_result.stat.exists
-    tags:
-      - slow
+  # - name: "RUST: curl -sSf https://static.rust-lang.org/rustup.sh | sh ONLY if it is not installed already"
+  #   shell: |
+  #     bash -lc "curl -sSf https://static.rust-lang.org/rustup.sh | sh"
+  #   args:
+  #     executable: /bin/bash
+  #   when: not cargo_result.stat.exists
+  #   tags:
+  #     - slow
 
   - name: install ctop
     shell: |
