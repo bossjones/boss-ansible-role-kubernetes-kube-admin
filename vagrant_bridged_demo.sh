@@ -203,55 +203,55 @@ for M in ${all_runningVagrMs_postfqdn} ; do
 done
 echo
 
-###
-echo "### Creating an ./ansible.cfg to based on the above ssh_config file and some more options, for ansible to be able to login "
-cat << EOF >ansible.cfg
-[defaults]
+# ###
+# echo "### Creating an ./ansible.cfg to based on the above ssh_config file and some more options, for ansible to be able to login "
+# cat << EOF >ansible.cfg
+# [defaults]
 
-roles_path     = ./:./roles:/etc/ansible/roles
-inventory      = inventory.ini
-nocows=True
-retry_files_enabled = False
+# roles_path     = ./:./roles:/etc/ansible/roles
+# inventory      = inventory.ini
+# nocows=True
+# retry_files_enabled = False
+# # stdout_callback = debug
+# callback_whitelist = actionable, profile_tasks, profile_roles, skippy, debug
 # stdout_callback = debug
-callback_whitelist = actionable, profile_tasks, profile_roles, skippy, debug
-stdout_callback = debug
 
-# NOTE: Enabling pipelining reduces the number of SSH operations required to execute a module on the remote server, by executing many ansible modules without actual file transfer. This can result in a very significant performance improvement when enabled, however when using “sudo:” operations you must first disable ‘requiretty’ in /etc/sudoers on all managed hosts.
-pipelining = False
+# # NOTE: Enabling pipelining reduces the number of SSH operations required to execute a module on the remote server, by executing many ansible modules without actual file transfer. This can result in a very significant performance improvement when enabled, however when using “sudo:” operations you must first disable ‘requiretty’ in /etc/sudoers on all managed hosts.
+# pipelining = False
 
-become = True
-host_key_checking = False
-deprecation_warnings = False
-callback_whitelist = profile_tasks
+# become = True
+# host_key_checking = False
+# deprecation_warnings = False
+# callback_whitelist = profile_tasks
 
-[ssh_connection]
-# NOTE: Occasionally users may be managing a remote system that doesn’t have SFTP enabled. If set to True, we can cause scp to be used to transfer remote files instead here's really no reason to change this unless problems are encountered, and then there’s also no real drawback to managing the switch. Most environments support SFTP by default and this doesn’t usually need to be changed.
-scp_if_ssh = False
+# [ssh_connection]
+# # NOTE: Occasionally users may be managing a remote system that doesn’t have SFTP enabled. If set to True, we can cause scp to be used to transfer remote files instead here's really no reason to change this unless problems are encountered, and then there’s also no real drawback to managing the switch. Most environments support SFTP by default and this doesn’t usually need to be changed.
+# scp_if_ssh = False
 
-# ssh_args = -o ForwardAgent=yes
-host_key_checking = False
-ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ForwardAgent=yes -o PasswordAuthentication=no -o ControlPath=~/.ansible/cp/ansible-ssh-%h-%p-%r -F ./ssh_config
-pipelining = True
+# # ssh_args = -o ForwardAgent=yes
+# host_key_checking = False
+# ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ForwardAgent=yes -o PasswordAuthentication=no -o ControlPath=~/.ansible/cp/ansible-ssh-%h-%p-%r -F ./ssh_config
+# pipelining = True
 
-EOF
+# EOF
 
 echo "  a local ./ansible.cfg has been generated with success. Contents:"
 cat ansible.cfg
 echo
 
 ###
-echo "### Generating (guessing) inventory file based on host names (master must have word master in its name)"
-echo "[master]" > hosts
-#echo $all_runningVagrMs | tr ' ' '\n' | grep "master" >> hosts
-echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep "master" >> hosts
-echo "[node]" >> hosts
-#echo $all_runningVagrMs | tr ' ' '\n' | grep -v "master" >> hosts
-echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep -v "master" >> hosts
-number_nodes=$( echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep -v "master" | wc -l )
-if [ $number_nodes -lt 1 ]; then
-  echo "no nodes were detected, so master will be also a node"
-  echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep "master" >> hosts
-fi
+# echo "### Generating (guessing) inventory file based on host names (master must have word master in its name)"
+# echo "[master]" > hosts
+# #echo $all_runningVagrMs | tr ' ' '\n' | grep "master" >> hosts
+# echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep "master" >> hosts
+# echo "[node]" >> hosts
+# #echo $all_runningVagrMs | tr ' ' '\n' | grep -v "master" >> hosts
+# echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep -v "master" >> hosts
+# number_nodes=$( echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep -v "master" | wc -l )
+# if [ $number_nodes -lt 1 ]; then
+#   echo "no nodes were detected, so master will be also a node"
+#   echo $all_runningVagrMs_postfqdn | tr ' ' '\n' | grep "master" >> hosts
+# fi
 
 echo
 echo "### The autogenerated inventory (./hosts file) looks like this:"

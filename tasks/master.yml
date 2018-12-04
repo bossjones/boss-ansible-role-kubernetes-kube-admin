@@ -14,6 +14,12 @@
 #     creates: /etc/kubeadm-join.sh
 #   register: kubeadm_out
 
+
+- name: "get kubeadm init command - {{boss__kubernetes__kubeadm__kubeadm_init_cmd}}"
+  debug:
+    msg: "{{boss__kubernetes__kubeadm__kubeadm_init_cmd}}"
+  changed_when: false
+
 - name: initialize kube
   shell: >
        kubeadm reset --force &&
