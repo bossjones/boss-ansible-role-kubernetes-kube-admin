@@ -60,7 +60,7 @@ six==1.11.0               # via ansible-lint, bcrypt, click-completion, cryptogr
 tabulate==0.8.2           # via molecule
 testinfra==1.14.1         # via molecule
 tree-format==0.1.2        # via molecule
-urllib3==1.24.1           # via requests
+urllib3==1.24.2           # via requests
 websocket-client==0.54.0  # via docker-py
 whichcraft==0.5.2         # via cookiecutter
 yamllint==1.11.1          # via molecule
