@@ -168,11 +168,11 @@
 
 
 - name: add node-ip.sh script
-  copy: 
-    src: node-ip.sh 
-    dest: /usr/local/bin/node-ip.sh 
-    owner: root 
-    group: root 
+  copy:
+    src: node-ip.sh
+    dest: /usr/local/bin/node-ip.sh
+    owner: root
+    group: root
     mode: 0755
   tags:
   - kubeadm
@@ -192,11 +192,11 @@
     state: directory
 
 - name: add docker-aliases.sh script
-  copy: 
-    src: docker-aliases.sh 
-    dest: /etc/profile.d/docker-aliases.sh 
-    owner: root 
-    group: root 
+  copy:
+    src: docker-aliases.sh
+    dest: /etc/profile.d/docker-aliases.sh
+    owner: root
+    group: root
     mode: 0755
   tags:
   - kubeadm
@@ -208,7 +208,7 @@
 # NOTE: Multi pod and container log tailing for Kubernetes
 - name: install stern
   shell: |
-    curl -L 'https://github.com/wercker/stern/releases/download/1.10.0/stern_linux_amd64' > /usr/local/bin/stern
+    curl -L 'https://github.com/wercker/stern/releases/download/{{STERN_VERSION}}/stern_linux_amd64' > /usr/local/bin/stern
     chmod +x /usr/local/bin/stern
   become: yes
   become_method: sudo
@@ -229,8 +229,8 @@
 # An interactive kubernetes client featuring auto-complete using go-prompt.
 - name: install kube-prompt
   shell: |
-    wget https://github.com/c-bata/kube-prompt/releases/download/v1.0.5/kube-prompt_v1.0.5_linux_amd64.zip
-    unzip kube-prompt_v1.0.5_linux_amd64.zip
+    wget https://github.com/c-bata/kube-prompt/releases/download/v{{KUBE_PROMPT_VERSION}}/kube-prompt_v{{KUBE_PROMPT_VERSION}}_linux_amd64.zip
+    unzip kube-prompt_v{{KUBE_PROMPT_VERSION}}_linux_amd64.zip
     chmod +x kube-prompt
     sudo mv ./kube-prompt /usr/local/bin/kube-prompt
   become: yes
@@ -242,7 +242,7 @@
 # Simplistic interactive filtering tool
 - name: install peco
   shell: |
-    wget https://github.com/peco/peco/releases/download/v0.5.3/peco_linux_amd64.tar.gz ;
+    wget https://github.com/peco/peco/releases/download/v{{PECO_VERSION}}/peco_linux_amd64.tar.gz ;
     tar xvf peco_linux_amd64.tar.gz ;
     mv peco_linux_amd64/peco /usr/local/bin/peco ;
     chmod +x /usr/local/bin/peco ;
@@ -257,7 +257,7 @@
 # kubespy - Tools for observing Kubernetes resources in real time, powered by Pulumi
 - name: install kubespy - Tools for observing Kubernetes resources in real time, powered by Pulumi
   shell: |
-    wget https://github.com/pulumi/kubespy/releases/download/v0.4.0/kubespy-linux-amd64.tar.gz ;
+    wget https://github.com/pulumi/kubespy/releases/download/v{{KUBESPY_VERSION}}/kubespy-linux-amd64.tar.gz ;
     tar xvf kubespy-linux-amd64.tar.gz ;
     mv releases/kubespy-linux-amd64/kubespy /usr/local/bin/kubespy ;
     chmod +x /usr/local/bin/kubespy ;

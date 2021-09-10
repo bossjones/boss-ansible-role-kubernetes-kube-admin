@@ -5,6 +5,10 @@
     "*.retry": "explorerExcludedFiles",
     "*~": "explorerExcludedFiles",
     "ansible/roles/darkedges.commonos/": "explorerExcludedFiles",
-    "*.log": "explorerExcludedFiles"
+    "*.log": "explorerExcludedFiles",
+    ".vagrant": "explorerExcludedFiles",
+    "ssh_config*": "explorerExcludedFiles",
+    "config-vbox": "explorerExcludedFiles",
+    "admin.conf": "explorerExcludedFiles"
   }
 }
